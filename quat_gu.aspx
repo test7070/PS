@@ -355,10 +355,10 @@
 				_readonly(t_para, empty);
 				if (t_para) {
 					$('#combAddr').attr('disabled', 'disabled');
-					$('#btnPack').removeAttr('disabled');
+					//$('#btnPack').removeAttr('disabled');
 				} else {
 					$('#combAddr').removeAttr('disabled');
-					$('#btnPack').attr('disabled','disabled');
+					//$('#btnPack').attr('disabled','disabled');
 				}
 			}
 			
@@ -643,7 +643,7 @@
 						<td><input id="txtSalesno" type="text" class="txt c1"/></td>
 						<td><input id="txtSales" type="text" class="txt c1"/></td>
 						<td> </td>
-						<td><input id="btnPack" type="button" value="Packing"/></td>
+						<td><!--<input id="btnPack" type="button" value="Packing"/>--></td>
 					</tr>
 					<tr>
 						<td><span> </span><a id='lblMoney' class="lbl"> </a></td>
