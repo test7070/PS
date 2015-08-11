@@ -1,0 +1,193 @@
+﻿z_orde2ordc_gu01:--z_orde2ordc_gu01
+SET QUOTED_IDENTIFIER OFF
+declare @t_noa nvarchar(50)
+declare @t_mount nvarchar(20)
+declare @t_stkdate nvarchar(30)
+
+set @t_noa = case when '#non' = [2] then '' else [2] end
+set @t_mount = case when '#non' = [3] then '0' else [3] end
+
+set @t_stkdate=CONVERT (VARCHAR(7), GETDATE(),12 )+0890000
+set @t_stkdate=left(@t_stkdate,3)+'/'+substring(@t_stkdate,4,2)+'/'+right(@t_stkdate,2)
+---------------------------------------------------------------------------------
+declare @tmpa table(
+	productno nvarchar(50),
+	product nvarchar(200),
+	spec nvarchar(50),
+	gdemand float
+)
+
+--uca
+insert @tmpa
+select b.productno,b.product,b.spec,b.mount*a.mount
+from view_ordes a left join ucas b on a.productno=b.noa 
+where a.noa=@t_noa and isnull(b.noa,'')!='' and isnull(a.productno,'')!=''
+
+--ucc
+insert @tmpa
+select a.productno,a.product,a.spec,a.mount
+from view_ordes a left join ucas b on a.productno=b.noa 
+where a.noa=@t_noa and  isnull(b.noa,'')='' and isnull(a.productno,'')!=''
+
+declare @cmd nvarchar(max) 
+IF OBJECT_ID('tempdb..#tmp')is not null
+BEGIN
+	set @cmd = 'drop table #tmp'
+	EXECUTE sp_executesql @cmd
+END
+
+
+create table #tmp(
+	gno nvarchar(1),
+	tggno nvarchar(50),
+	tgg nvarchar(100),
+	productno nvarchar(50),
+	product nvarchar(200),
+	spec nvarchar(50),
+	gdemand float,
+	stkmount float,
+	ordcmount float,
+	safemount float,
+	ndemand float,
+	
+	sordc float,
+	src2 float,
+	sunrc2 float
+)
+
+insert #tmp (gno,productno,product,spec,gdemand)
+select '0',productno,MAX(product),MAX(spec),sum(gdemand)
+from @tmpa group by productno
+
+update a
+set tggno=b.tggno,tgg=b.tgg
+,stkmount=isnull(c.mount,0),ordcmount=isnull(d.mount,0),safemount=isnull(b.safemount,0)
+,sordc=isnull(e.mount,0),src2=isnull(f.mount,0),sunrc2=isnull(e.mount,0)-isnull(f.mount,0)
+from #tmp a
+left join ucc b on a.productno=b.noa
+outer apply (select sum(mount) mount from stkucc(@t_stkdate,'','') where productno=a.productno)c
+outer apply (select sum(cb.mount)mount from view_ordc ca left join view_ordcs cb on ca.noa=cb.noa where isnull(ca.enda,0)!=1 and isnull(cb.enda,0)!=1 and cb.productno=a.productno and ca.quatno!='')d
+outer apply (select sum(cb.mount)mount from view_ordc ca left join view_ordcs cb on ca.noa=cb.noa where ca.quatno=@t_noa and productno=a.productno )e
+outer apply (select sum(rs.mount)mount from view_ordc ca left join view_ordcs cb on ca.noa=cb.noa left join view_rc2s rs on cb.noa=rs.ordeno and cb.no2=rs.no2 where ca.quatno=@t_noa and cb.productno=a.productno and rs.productno=a.productno)f
+
+update a
+set ndemand=case when (a.gdemand-a.stkmount-a.ordcmount+a.safemount)<=0 then 0 else (a.gdemand-a.stkmount-a.ordcmount+a.safemount) end
+from #tmp a
+
+select
+dbo.getComma(gdemand,0)gdemand
+,dbo.getComma(stkmount,0)stkmount
+,dbo.getComma(ordcmount,0)ordcmount
+,dbo.getComma(safemount,0)safemount
+,dbo.getComma(ndemand,0)ndemand
+,dbo.getComma(sordc,0)sordc
+,dbo.getComma(src2,0)src2
+,dbo.getComma(sunrc2,0)sunrc2
+,product products
+,*
+from #tmp order by gno,tggno,productno
+
+IF OBJECT_ID('tempdb..#tmp')is not null
+BEGIN
+	set @cmd = 'drop table #tmp'
+	EXECUTE sp_executesql @cmd
+END;
+----------------------------------------------------------------------------------
+z_orde2ordc_gu:--z_orde2ordc_gu 轉採購單
+SET QUOTED_IDENTIFIER OFF
+declare @t_noa nvarchar(50)
+declare @t_mount nvarchar(20)
+declare @t_stkdate nvarchar(30)
+
+set @t_noa = case when '#non' = [2] then '' else [2] end
+set @t_mount = case when '#non' = [3] then '0' else [3] end
+
+set @t_stkdate=CONVERT (VARCHAR(7), GETDATE(),12 )+0890000
+set @t_stkdate=left(@t_stkdate,3)+'/'+substring(@t_stkdate,4,2)+'/'+right(@t_stkdate,2)
+---------------------------------------------------------------------------------
+declare @tmpa table(
+	productno nvarchar(50),
+	product nvarchar(200),
+	spec nvarchar(50),
+	gdemand float
+)
+
+--uca
+insert @tmpa
+select b.productno,b.product,b.spec,b.mount*a.mount
+from view_ordes a left join ucas b on a.productno=b.noa 
+where a.noa=@t_noa and isnull(b.noa,'')!='' and isnull(a.productno,'')!=''
+
+--ucc
+insert @tmpa
+select a.productno,a.product,a.spec,a.mount
+from view_ordes a left join ucas b on a.productno=b.noa 
+where a.noa=@t_noa and  isnull(b.noa,'')='' and isnull(a.productno,'')!=''
+
+declare @cmd nvarchar(max) 
+IF OBJECT_ID('tempdb..#tmp')is not null
+BEGIN
+	set @cmd = 'drop table #tmp'
+	EXECUTE sp_executesql @cmd
+END
+
+
+create table #tmp(
+	gno nvarchar(1),
+	tggno nvarchar(50),
+	tgg nvarchar(100),
+	productno nvarchar(50),
+	product nvarchar(200),
+	spec nvarchar(50),
+	gdemand float,
+	stkmount float,
+	ordcmount float,
+	safemount float,
+	ndemand float,
+	
+	sordc float,
+	src2 float,
+	sunrc2 float
+)
+
+insert #tmp (gno,productno,product,spec,gdemand)
+select '0',productno,MAX(product),MAX(spec),sum(gdemand)
+from @tmpa group by productno
+
+update a
+set tggno=b.tggno,tgg=b.tgg
+,stkmount=isnull(c.mount,0),ordcmount=isnull(d.mount,0),safemount=isnull(b.safemount,0)
+,sordc=isnull(e.mount,0),src2=isnull(f.mount,0),sunrc2=isnull(e.mount,0)-isnull(f.mount,0)
+from #tmp a
+left join ucc b on a.productno=b.noa
+outer apply (select sum(mount) mount from stkucc(@t_stkdate,'','') where productno=a.productno)c
+outer apply (select sum(cb.mount)mount from view_ordc ca left join view_ordcs cb on ca.noa=cb.noa where isnull(ca.enda,0)!=1 and isnull(cb.enda,0)!=1 and cb.productno=a.productno and ca.quatno!='')d
+outer apply (select sum(cb.mount)mount from view_ordc ca left join view_ordcs cb on ca.noa=cb.noa where ca.quatno=@t_noa and productno=a.productno )e
+outer apply (select sum(rs.mount)mount from view_ordc ca left join view_ordcs cb on ca.noa=cb.noa left join view_rc2s rs on cb.noa=rs.ordeno and cb.no2=rs.no2 where ca.quatno=@t_noa and cb.productno=a.productno and rs.productno=a.productno)f
+
+update a
+set ndemand=case when (a.gdemand-a.stkmount-a.ordcmount+a.safemount)<=0 then 0 else (a.gdemand-a.stkmount-a.ordcmount+a.safemount) end
+from #tmp a
+
+select
+dbo.getComma(gdemand,0)gdemand
+,dbo.getComma(stkmount,0)stkmount
+,dbo.getComma(ordcmount,0)ordcmount
+,dbo.getComma(safemount,0)safemount
+,dbo.getComma(ndemand,0)ndemand
+,dbo.getComma(sordc,0)sordc
+,dbo.getComma(src2,0)src2
+,dbo.getComma(sunrc2,0)sunrc2
+,product products
+,*
+from #tmp order by gno,tggno,productno
+
+--新增採購單
+select * from #tmp group by tggno
+
+
+IF OBJECT_ID('tempdb..#tmp')is not null
+BEGIN
+	set @cmd = 'drop table #tmp'
+	EXECUTE sp_executesql @cmd
+END;
