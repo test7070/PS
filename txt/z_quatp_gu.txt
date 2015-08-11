@@ -1,0 +1,5 @@
+﻿z_quatp_gu01:--z_quatp_gu01
+
+declare @t_noa nvarchar(50)
+set @t_noa = case when '#non' = [1] then '' else [1] end
+--------------------------------------------------------------------------------
