@@ -1,0 +1,148 @@
+﻿z_invop_gu01:--z_invop_gu01
+
+declare @t_noa nvarchar(30)
+
+set @t_noa = case when '#non' = [2] then '' else [2] end
+---------------------------------------------------------------------------------
+
+declare @tmp table(
+	gno nvarchar(1),
+	rec int,
+	
+	c_addr nvarchar(max),
+	c_tel nvarchar(20),
+	c_fax nvarchar(20),
+	c_email nvarchar(100),	
+	
+	noa nvarchar(30),
+	datea nvarchar(10),
+	invoice nvarchar(100),
+	comp nvarchar(50),
+	addr nvarchar(max),
+	shipped nvarchar(50),
+	per nvarchar(50),
+	sailing nvarchar(50),
+	froma nvarchar(50),
+	toa nvarchar(50),
+--	bank nvarchar(1),
+	lcno nvarchar(30),
+--	dated nvarchar(1),
+	
+	itemno nvarchar(100),
+	description nvarchar(200),
+	quantity float,
+	price float,
+	amount float	
+)
+
+insert into @tmp
+select 
+	'2',ROW_NUMBER() over (partition by a.noa order by a.noa),c.addr,c.tel,c.fax,c.email,
+	a.noa,a.datea,a.title,a.comp,a.addr,a.shipped,a.per,a.sailing,a.froma,a.toa,/*bank*/a.lcno,/*dated*/
+	b.productno,b.description,b.quantity,price,b.amount
+from invo a	
+left join invos b on a.noa = b.noa
+left join acomp c on a.cno = c.noa
+where (a.noa = @t_noa)
+
+--控制換行
+declare @rec nvarchar(30)
+declare @noa nvarchar(30)
+declare @xnoa nvarchar(30)
+declare @cnt int
+declare @max int
+
+set @xnoa = 'xxxxxxxxxx'
+
+declare cursor_table cursor for 
+select rec,noa from @tmp where gno = '2' order by noa
+open cursor_table 
+fetch next from cursor_table 
+into @rec,@noa
+while(@@FETCH_STATUS <> -1) 
+begin
+	if(@noa != @xnoa)
+	begin 
+		insert into @tmp(gno,rec,c_addr,c_tel,c_fax,c_email,noa,datea,invoice,comp,addr,shipped,per,froma,toa,lcno)
+		select '1',rec,c_addr,c_tel,c_fax,c_email,noa,datea,invoice,comp,addr,shipped,per,froma,toa,lcno from @tmp where rec = @rec
+		
+		set @cnt = 0
+		set @max = (select MAX(rec) from @tmp where gno = '2' and noa = @noa)
+	end
+	
+	set @cnt = @cnt + 1
+	
+	if(@cnt % 36 = 0 or @rec = @max)
+	begin
+		insert into @tmp(gno,rec,noa)
+		select '3',rec,noa from @tmp where rec = @rec 
+	end
+	if(@cnt % 36 = 0 and @rec != @max)
+	begin
+		insert into @tmp(gno,rec,c_addr,c_tel,c_fax,c_email,noa,datea,invoice,comp,addr,shipped,per,froma,toa,lcno)
+		select '1',@rec+1,c_addr,c_tel,c_fax,c_email,noa,datea,invoice,comp,addr,shipped,per,froma,toa,lcno from @tmp where rec = @rec and gno = '2'
+	end
+	
+	
+	set @xnoa = @noa
+	
+	fetch next from cursor_table
+	into @rec,@noa
+end 
+close cursor_table 
+deallocate cursor_table
+
+insert into @tmp(gno,rec,c_addr,c_tel,c_fax,c_email,noa,datea)
+select '4',MAX(rec),MAX(c_addr),MAX(c_tel),MAX(c_fax),MAX(c_email),MAX(noa),MAX(datea) from @tmp
+
+select 
+	gno,rec,c_addr,c_tel,c_fax,c_email,noa,datea,invoice,comp,addr,shipped,per,sailing,froma,toa,lcno,itemno,description,
+	dbo.getComma(quantity,0) quantity,dbo.getComma(price,2) price,dbo.getComma(amount,2) amount
+from @tmp order by rec,gno  ;
+
+
+
+--*******************************************************************************
+z_invop_gu02:--z_invop_gu02
+
+declare @t_noa nvarchar(30)
+
+set @t_noa = case when '#non' = [2] then '' else [2] end
+---------------------------------------------------------------------------------
+
+declare @tmp table(
+	gno nvarchar(1),
+	
+	c_addr nvarchar(max),
+	c_tel nvarchar(20),
+	c_fax nvarchar(20),
+	c_email nvarchar(100),
+	
+	noa nvarchar(30),
+	vccno nvarchar(30),
+	comp nvarchar(90),
+	productno nvarchar(30),
+	product nvarchar(100),
+	mount float,
+	weight float,
+	gweight float,
+	cuft float
+	
+)
+
+insert into @tmp
+select '0',d.addr,d.tel,d.fax,d.email,a.noa,a.vccno,c.comp,b.productno,b.product,b.mount,b.weight,b.gweight,b.cuft
+from invo a
+left join packing b on a.noa = b.noa
+left join cust c on a.custno = c.noa
+left join acomp d on a.cno = d.noa
+where (a.noa = @t_noa)
+
+insert into @tmp(gno,noa,mount,weight,gweight,cuft)
+select '1',noa,SUM(mount),SUM(weight),SUM(gweight),SUM(cuft)
+from @tmp where gno = '0' group by noa
+
+select 
+	gno,c_addr,c_tel,c_fax,c_email,noa,vccno,comp,productno,product,
+	mount,dbo.getComma(weight,1) weight,dbo.getComma(gweight,1)gweight,dbo.getComma(cuft,2) cuft
+from @tmp  ;

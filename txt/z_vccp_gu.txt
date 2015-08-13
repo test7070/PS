@@ -1,4 +1,4 @@
-﻿z_vccp_gu1:--z_vccp_gu1
+﻿z_vccp_gu01:--z_vccp_gu01
 declare @t_bxnoa nvarchar(20)
 declare @t_exnoa nvarchar(20)
 
@@ -10,18 +10,61 @@ set @t_exnoa = case when '#non' = [3] then CHAR(255) else [3] end
 
 declare @tmp table(
 	gno nvarchar(1),
-	noa nvarchar(50),
-	datea nvarchar(50),
-	custname nvarchar(50),
-	tel nvarchar(20),
-	ordeno nvarchar(20),
-	product nvarchar(50),
+	
+	c_addr nvarchar(max),
+	c_tel nvarchar(20),
+	c_fax nvarchar(20),
+	
+	rec int,
+	noa nvarchar(20),
+	datea nvarchar(10),
+	comp nvarchar(100),
+	tel nvarchar(90),
+	ordeno nvarchar(50),
+	product nvarchar(200),
 	mount float,
-	weight float
+	weight float,
+	unit nvarchar(10),
+	width float,
+	addr nvarchar(90)
 )
 insert into @tmp
-select '0',a.noa,b.datea,a.comp,a.tel,b.ordeno,b.product,b.mount,b.weight from view_vcc a
+select '0',c.addr,c.tel,c.fax,ROW_NUMBER() over (partition by a.noa order by a.noa),a.noa,b.datea,a.comp,a.tel,b.ordeno,b.product,b.mount,b.weight,b.unit,b.width,a.addr
+from view_vcc a
 left join view_vccs b on a.noa=b.noa
+left join acomp c on a.cno = c.noa
 where (a.noa between @t_bxnoa and @t_exnoa)
 
-select * from @tmp;
+declare @rec int
+declare @noa nvarchar(20)
+declare @xnoa nvarchar(20)
+
+set @xnoa = 'xxxxxxxxxx'
+
+declare cursor_table cursor for 
+select rec,noa from @tmp order by noa
+open cursor_table 
+fetch next from cursor_table 
+into @rec,@noa 
+while(@@FETCH_STATUS <> -1) 
+begin
+
+	if(@noa != @xnoa)
+	begin
+		insert into @tmp(gno,rec,noa,addr)
+		select '1',rec,noa,addr from @tmp where rec = @rec and noa = @noa
+	end
+	
+	set @xnoa = @noa
+	
+	fetch next from cursor_table 
+	into @rec,@noa	
+end 
+close cursor_table 
+deallocate cursor_table 
+
+update @tmp set datea = dbo.split(datea,'/',0)+'年'+dbo.split(datea,'/',1)+'月'+dbo.split(datea,'/',2)+'日'
+
+select
+	gno,c_addr,c_tel,c_fax,rec,noa,datea,comp,tel,ordeno,product,mount,dbo.getComma(weight,0)+unit weight,width,addr
+from @tmp order by noa,gno  ;
