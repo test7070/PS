@@ -4,7 +4,6 @@ declare @t_noa nvarchar(50)
 
 set @t_noa = case when '#non' = [1] then '' else [1] end
 --------------------------------------------------------------------------------
-
 SET QUOTED_IDENTIFIER OFF
 
 declare @tmp table(
@@ -33,7 +32,9 @@ declare @q_productno nvarchar(30)
 declare @q_xproductno nvarchar(30)  
 declare @product nvarchar(100)
 declare @xproduct nvarchar(100)
+declare @spec nvarchar(50)
 declare @cnt int
+declare @max int
 declare @i int
 declare @str nvarchar(100)
 
@@ -53,21 +54,26 @@ begin
 		select '1',q_productno,q_product,memo,total from @tmp where gno = '8' and rec = @rec
 	end
 	if(@product != @xproduct)
-	begin 
-				
+	begin 			
 		set @cnt = (select COUNT(*) from @tmp where gno = '8' and q_productno = @q_productno and product = @product)
+		set @max = (select MAX(rec) from @tmp where gno = '8' and q_productno = @q_productno and product = @product) 
 		set @i = 0
 		set @str = ''
 		while(@i < @cnt)
 		begin
+			set @spec = (select spec2 from @tmp where gno = '8' and rec = @rec+@i and  q_productno = @q_productno and product = @product)
+			if(RIGHT(@spec,2) = 'mm' and @rec+@i != @max)
+			begin
+				set @spec = REPLACE(@spec,'mm','')
+			end
 			if(@i = 0)
 			begin
-				set @str = @str + (select spec2 from @tmp where gno = '8' and rec = @rec+@i and  q_productno = @q_productno and product = @product)
+				set @str = @str + @spec
 				set @i = @i +1	
 			end	
 			else
 			begin	
-				set @str = @str + ',' + (select spec2 from @tmp where gno = '8' and rec = @rec+@i and  q_productno = @q_productno and product = @product)
+				set @str = @str + ',' + @spec
 				set @i = @i +1
 			end
 		end		
@@ -79,7 +85,7 @@ begin
 	set @xproduct = @product
 	
 	fetch next from cursor_table 
-	into @rec,@q_productno,@product	
+	into @rec,@q_productno,@product
 end 
 close cursor_table 
 deallocate cursor_table 
