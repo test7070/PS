@@ -4,7 +4,6 @@ declare @t_noa nvarchar(30)
 
 set @t_noa = case when '#non' = [2] then '' else [2] end
 ---------------------------------------------------------------------------------
-
 declare @tmp table(
 	gno nvarchar(1),
 	rec int,
@@ -24,7 +23,7 @@ declare @tmp table(
 	sailing nvarchar(50),
 	froma nvarchar(50),
 	toa nvarchar(50),
---	bank nvarchar(1),
+	bank nvarchar(1),
 	lcno nvarchar(30),
 --	dated nvarchar(1),
 	
@@ -32,17 +31,23 @@ declare @tmp table(
 	description nvarchar(200),
 	quantity float,
 	price float,
-	amount float	
+	amount float,
+	
+	main nvarchar(max),
+	side nvarchar(max),
+	memo nvarchar(max)
 )
 
 insert into @tmp
 select 
-	'2',ROW_NUMBER() over (partition by a.noa order by a.noa),c.addr,c.tel,c.fax,c.email,
-	a.noa,a.datea,a.title,a.comp,a.addr,a.shipped,a.per,a.sailing,a.froma,a.toa,/*bank*/a.lcno,/*dated*/
-	b.productno,b.description,b.quantity,price,b.amount
+	'2',ROW_NUMBER() over (partition by a.noa order by a.noa),d.addr,d.tel,d.fax,d.email,
+	a.noa,a.datea,a.title,a.comp,a.addr,a.shipped,a.per,a.sailing,a.froma,a.toa,c.negotiatingbank,a.lcno,/*dated*/
+	b.productno,b.description,b.quantity,price,b.amount,
+	c.main,c.side,c.invoicememo
 from invo a	
 left join invos b on a.noa = b.noa
-left join acomp c on a.cno = c.noa
+left join ordei c on a.noa = c.noa
+left join acomp d on a.cno = d.noa
 where (a.noa = @t_noa)
 
 --控制換行
@@ -71,14 +76,11 @@ begin
 	end
 	
 	set @cnt = @cnt + 1
-	
-	if(@cnt % 36 = 0 or @rec = @max)
+
+	if(@cnt % 30 = 0 and @rec != @max)
 	begin
 		insert into @tmp(gno,rec,noa)
-		select '3',rec,noa from @tmp where rec = @rec 
-	end
-	if(@cnt % 36 = 0 and @rec != @max)
-	begin
+		select '3',rec,noa from @tmp where rec = @rec
 		insert into @tmp(gno,rec,c_addr,c_tel,c_fax,c_email,noa,datea,invoice,comp,addr,shipped,per,froma,toa,lcno)
 		select '1',@rec+1,c_addr,c_tel,c_fax,c_email,noa,datea,invoice,comp,addr,shipped,per,froma,toa,lcno from @tmp where rec = @rec and gno = '2'
 	end
@@ -92,14 +94,18 @@ end
 close cursor_table 
 deallocate cursor_table
 
-insert into @tmp(gno,rec,c_addr,c_tel,c_fax,c_email,noa,datea)
-select '4',MAX(rec),MAX(c_addr),MAX(c_tel),MAX(c_fax),MAX(c_email),MAX(noa),MAX(datea) from @tmp
+insert into @tmp(gno,rec,noa,quantity,amount)
+select '4',MAX(rec),noa,SUM(quantity),SUM(amount)
+from @tmp where gno = '2' group by noa
+
+insert into @tmp(gno,rec,c_addr,c_tel,c_fax,c_email,noa,datea,main,side,memo)
+select '5',MAX(rec),MAX(c_addr),MAX(c_tel),MAX(c_fax),MAX(c_email),MAX(noa),MAX(datea),MAX(main),MAX(side),MAX(memo)
+from @tmp where gno = '2' group by noa
 
 select 
-	gno,rec,c_addr,c_tel,c_fax,c_email,noa,datea,invoice,comp,addr,shipped,per,sailing,froma,toa,lcno,itemno,description,
-	dbo.getComma(quantity,0) quantity,dbo.getComma(price,2) price,dbo.getComma(amount,2) amount
-from @tmp order by rec,gno  ;
-
+	gno,rec,c_addr,c_tel,c_fax,c_email,noa,datea,invoice,comp,addr,shipped,per,sailing,froma,toa,bank,lcno,itemno,description,
+	dbo.getComma(quantity,0) quantity,dbo.getComma(price,2) price,dbo.getComma(amount,2) amount,main,side,memo
+from @tmp order by noa,rec,gno ;
 
 
 --*******************************************************************************

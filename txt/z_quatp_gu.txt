@@ -52,7 +52,6 @@ begin
 		insert into @tmp(gno,q_productno,q_product,memo,total)
 		select '1',q_productno,q_product,memo,total from @tmp where gno = '8' and rec = @rec
 	end
-	
 	if(@product != @xproduct)
 	begin 
 				
@@ -99,14 +98,11 @@ fetch next from cursor_table
 into @rec,@q_productno,@q_product
 while(@@FETCH_STATUS <> -1) 
 begin
-
 	if(@q_product != @q_xproduct)
 	begin 
 		insert into @tmp(gno,q_productno,q_product,memo)
 		select '3',q_productno,q_product,memo from @tmp where gno = '4' and rec = @rec and q_product = @q_product
 	end	
-	
-	
 	set @q_xproduct = @q_product
 	
 	fetch next from cursor_table 
