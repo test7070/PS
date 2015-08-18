@@ -159,6 +159,40 @@ deallocate cursor_table
 
 delete @tmp where gno = '7' or gno = '8'
 
+declare @xquatno nvarchar(30)
+declare @q_xproduct nvarchar(100)
+declare @min int
+declare @len int
+
+set @xquatno = 'xxxxxx'
+set @q_xproduct = 'xxxxxx'
+
+declare cursor_table cursor for 
+select rec,tggno,quatno,q_product from @tmp where gno = '2' order by tggno,rec
+open cursor_table 
+fetch next from cursor_table 
+into @rec,@tggno,@quatno,@q_product 
+while(@@FETCH_STATUS <> -1) 
+begin
+	if(@q_product != @q_xproduct)
+	begin
+		set @min = (select MIN(rec) from @tmp where tggno = @tggno and quatno = @quatno and q_product = @q_product)
+		set @len = LEN(@q_product)	
+	end
+	if(@min < @rec)
+	begin
+		update @tmp set q_product = REPLICATE('&nbsp',@len) where tggno = @tggno and rec = @rec and quatno = @quatno and q_product = @q_product
+	end
+	
+	set @xquatno = @quatno
+	set @q_xproduct = @q_product
+
+	fetch next from cursor_table 
+	into @rec,@tggno,@quatno,@q_product
+end 
+close cursor_table 
+deallocate cursor_table 
+
 declare @xtggno  nvarchar(20)
 set @xtggno = 'xxxxxxxxxx'
 
@@ -480,8 +514,8 @@ begin
 	end	
 	if(@rec = @max)
 	begin
-		insert into @tmp(gno,rec,quatno)
-		select '2',rec,quatno from @tmp where rec = @rec and quatno = @quatno
+		insert into @tmp(gno,rec,quatno,trandate)
+		select '2',rec,quatno,CONVERT(varchar(10),GETDATE(),111) from @tmp where rec = @rec and quatno = @quatno
 	end
 	set @xquatno = @quatno
 	
