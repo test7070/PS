@@ -50,9 +50,12 @@
                     $('#txtXnoa').val(wParent.getElementById("txtNoa").value);
                 }
                 
-                $('#btnOrda2ordb').click(function() {
-                	if(!emp($('#txtXnoa').val()))
+                $('#btnOrde2ordc').click(function() {
+                	if(!emp($('#txtXnoa').val())){
                     	q_gt('view_orde', "where=^^ noa='"+$('#txtXnoa').val()+"' ^^ ", 0, 0, 0, "orde2ordc", r_accy);
+                    }else{
+		            	alert('請輸入訂單編號!!');
+		            }
                 });
 
             }
@@ -65,27 +68,8 @@
                     case 'orde2ordc':
                         var as = _q_appendData("view_orde", "", true);
                         if (as[0] != undefined) {
-                        	
-                            if (confirm("確定要轉採購?")) {
-                                var bdate = !emp($('#txtOdate1').val()) ? $('#txtOdate1').val() : '#non';
-                                var edate = !emp($('#txtOdate2').val()) ? $('#txtOdate2').val() : '#non';
-                                var bworkgno = !emp($('#txtWorkgno1').val()) ? $('#txtWorkgno1').val() : '#non';
-                                var eworkgno = !emp($('#txtWorkgno2').val()) ? $('#txtWorkgno2').val() : '#non';
-                                var bpno = !emp($('#txtXproductno1a').val()) ? $('#txtXproductno1a').val() : '#non';
-                                var epno = !emp($('#txtXproductno2a').val()) ? $('#txtXproductno2a').val() : '#non';
-                                var otherworkgall = !emp($('#q_report').data('info').sqlCondition[7].getValue()) ? $('#q_report').data('info').sqlCondition[7].getValue() : '#non';
-                                var benddate = !emp($('#txtEnddate1').val()) ? $('#txtEnddate1').val() : '#non';
-                                var eenddate = !emp($('#txtEnddate2').val()) ? $('#txtEnddate2').val() : '#non';
-                                var ordc = !emp($('#q_report').data('info').sqlCondition[10].getValue()) ? $('#q_report').data('info').sqlCondition[10].getValue() : '#non';
-                                var safe = !emp($('#q_report').data('info').sqlCondition[11].getValue()) ? $('#q_report').data('info').sqlCondition[11].getValue() : '#non';
-                                var store = !emp($('#q_report').data('info').sqlCondition[12].getValue()) ? $('#q_report').data('info').sqlCondition[12].getValue() : '#non';
-                                var workgall = !emp($('#q_report').data('info').sqlCondition[13].getValue()) ? $('#q_report').data('info').sqlCondition[13].getValue() : '#non';
-
-                                var t_where = r_accy + ';' + bdate + ';' + edate + ';' + bworkgno + ';' + eworkgno + ';' + bpno + ';' + epno + ';' + otherworkgall + ';' + benddate + ';' + eenddate + ';' + ordc + ';' + safe + ';' + store + ';' + workgall + ';' + r_userno + ';' + q_getPara('sys.key_orda');
-                                var t_para = "r_comp=" + q_getPara('sys.comp') + ",r_accy=" + r_accy + ",r_cno=" + r_cno;
-                                //q_gtx("z_orde2ordc_gu4", t_where + ";;" + t_para + ";;z_orde2ordc_gu;;" + q_getMsg('qTitle'));
-                                q_func('qtxt.query.ordc', 'orde.txt,ordc_gu,' + t_where);
-                            }
+                        	//檢查是否已轉採購或進貨
+		                    q_func('qtxt.query.orde_ordc_rc2_gu', 'orde.txt,orde_ordc_rc2_gu,' + encodeURI(r_accy) + ';' + encodeURI($('#txtXnoa').val()));
                         } else {
                             alert('訂單不存在!!');
                         }
@@ -95,11 +79,41 @@
 
             function q_funcPost(t_func, result) {
                 switch(t_func) {
-                    case 'qtxt.query.ordc':
+                	case 'qtxt.query.orde_ordc_rc2_gu':
+                		var as = _q_appendData("tmp0", "", true, true);
+                		if (as[0] != undefined) {//已產生採購單
+                			if(dec(as[0].rc2mount)>0){
+                				alert('採購單已進貨禁止重新產生!!');
+                			}else{
+                				if (confirm("已轉採購單是否重新產生?")) {
+                					q_func('qtxt.query.orde2ordc_gu_1', 'orde.txt,orde2ordc_gu,' + encodeURI(r_accy) + ';' + encodeURI($('#txtXnoa').val())+ ';' + encodeURI($('#Xmount select').val())+ ';' + encodeURI(r_name));
+                					$('#btnOrde2ordc').val('產生中....').attr('disabled', 'disabled').css('font-weight', '' ).css('color', '');
+                				}
+                			}
+                			
+                		}else{//未產生採購單
+                			if (confirm("確定要轉採購單?")) {
+	                			q_func('qtxt.query.orde2ordc_gu_0', 'orde.txt,orde2ordc_gu,' + encodeURI(r_accy) + ';' + encodeURI($('#txtXnoa').val())+ ';' + encodeURI($('#Xmount select').val())+ ';' + encodeURI(r_name));
+	                			$('#btnOrde2ordc').val('產生中....').attr('disabled', 'disabled').css('font-weight', '' ).css('color', '');
+	                		}
+                		}
+                		break;
+                    case 'qtxt.query.orde2ordc_gu_0':
                         var as = _q_appendData("tmp0", "", true, true);
                         if (as[0] != undefined) {
-                            alert('採購單產生成功。');
+                        	if(dec(as[0].counts)>0)
+                            	alert('採購單產生成功。');
+                            else
+                            	alert('採購單產生失敗。');
                         }
+                        $('#btnOrde2ordc').val('轉採購').removeAttr('disabled').css('font-weight', 'bold').css('color', 'blue');
+                        break;
+					case 'qtxt.query.orde2ordc_gu_1':
+                        var as = _q_appendData("tmp0", "", true, true);
+                        if (as[0] != undefined) {
+                            alert('已重新產生採購單!!');
+                        }
+                        $('#btnOrde2ordc').val('轉採購').removeAttr('disabled').css('font-weight', 'bold').css('color', 'blue');
                         break;
                 }
             }
