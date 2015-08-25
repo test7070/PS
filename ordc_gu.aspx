@@ -418,7 +418,7 @@
 			function _btnSeek() {
 				if (q_cur > 0 && q_cur < 4)
 					return;
-				q_box('ordc_s.aspx', q_name + '_s', "550px", "400px", q_getMsg("popSeek"));
+				q_box('ordc_gu_s.aspx', q_name + '_s', "550px", "420px", q_getMsg("popSeek"));
 			}
 
 			function combPaytype_chg() {
@@ -529,7 +529,7 @@
 			}
 
 			function btnPrint() {
-				q_box("z_ordcp.aspx?" + r_userno + ";" + r_name + ";" + q_time + ";noa=" + $('#txtNoa').val() + ";" + r_accy, 'z_ordcp', "95%", "95%", q_getMsg('popPrint'));
+				q_box("z_ordcp_gu.aspx?" + r_userno + ";" + r_name + ";" + q_time + ";noa=" + $('#txtNoa').val() + ";" + r_accy, 'z_ordcp', "95%", "95%", q_getMsg('popPrint'));
 			}
 
 			function wrServer(key_value) {
@@ -1098,10 +1098,10 @@
 						<input class="txt c1" id="txtProductno2.*" type="text" />
 						<input class="txt c1" id="txtProductno3.*" type="text" />
 						<input class="txt c1" id="txtProductno.*" type="hidden" />
-						<input id="txtNo2.*" type="text" class="txt" style="width:60px;"/>
 						<input class="btn" id="btnProduct1.*" type="button" value='.' style=" font-weight: bold;" />
 						<input class="btn" id="btnProduct2.*" type="button" value='.' style=" font-weight: bold;" />
 						<input class="btn" id="btnProduct3.*" type="button" value='.' style=" font-weight: bold;" />
+						<input id="txtNo2.*" type="text" class="txt" style="width:60px;"/>
 					</td>
 					<td>
 						<input id="txtProduct.*" type="text" class="txt c1"/>
