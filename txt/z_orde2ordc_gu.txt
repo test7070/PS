@@ -1,4 +1,4 @@
-﻿z_orde2ordc_gu01:--z_orde2ordc_gu01
+﻿z_orde2ordc_gu01:--z_orde2ordc_gu01 報表
 SET QUOTED_IDENTIFIER OFF
 declare @t_noa nvarchar(50)
 declare @t_mount nvarchar(20)
@@ -35,7 +35,6 @@ BEGIN
 	set @cmd = 'drop table #tmp'
 	EXECUTE sp_executesql @cmd
 END
-
 
 create table #tmp(
 	gno nvarchar(1),
@@ -93,7 +92,7 @@ BEGIN
 	EXECUTE sp_executesql @cmd
 END;
 ----------------------------------------------------------------------------------
-orde_ordc_rc2_gu:--z_orde2ordc_gu 轉採購單
+orde_ordc_rc2_gu:--orde_ordc_rc2_gu 判斷轉採購單或已進貨
 SET QUOTED_IDENTIFIER OFF
 
 declare @t_accy nvarchar(50)
@@ -102,13 +101,13 @@ declare @t_noa nvarchar(50)
 set @t_accy = case when '#non' = [1] then '104' else [1] end
 set @t_noa = case when '#non' = [2] then '' else [2] end
 
-select sum(isnull(rs.mount,0))rc2mount 
+select sum(isnull(cb.mount,0)) ordcmount,sum(isnull(rs.mount,0))rc2mount 
 from view_ordc ca left join view_ordcs cb on ca.noa=cb.noa 
 left join view_rc2s rs on cb.noa=rs.ordeno and cb.no2=rs.no2 
-where ca.quatno=@t_noa and isnull(rs.noa,'')!=''
+where ca.quatno=@t_noa --and isnull(rs.noa,'')!=''
 ;
 ----------------------------------------------------------------------------------
-z_orde2ordc_gu:--z_orde2ordc_gu 轉採購單
+orde2ordc_gu:--orde2ordc_gu 轉採購單
 SET QUOTED_IDENTIFIER OFF
 
 declare @t_accy nvarchar(50)
