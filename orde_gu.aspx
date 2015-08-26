@@ -97,9 +97,10 @@
 				var t_where = "where=^^ 1=1 group by post,addr^^";
 				q_gt('custaddr', t_where, 0, 0, 0, "");
 				
-				$('#btnOrdei').hide();
+				//$('#btnOrdei').hide();
 				$('#btnOrdei').click(function() {
-					if (q_cur != 1 && $('#cmbStype').find("option:selected").text() == '外銷')
+					var t_noa = $('#txtNoa').val();
+					if (t_noa.length > 0 && q_cur != 1 && $('#cmbStype').find("option:selected").text() == '外銷')
 						q_box("ordei.aspx?" + r_userno + ";" + r_name + ";" + q_time + ";noa='" + $('#txtNoa').val() + "';" + r_accy + ";" + q_cur, 'ordei', "95%", "95%", q_getMsg('popOrdei'));
 				});
 				$('#btnQuat').click(function() {

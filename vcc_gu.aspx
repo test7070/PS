@@ -260,9 +260,10 @@
 				$('#btnBoaj').click(function() {
 					var t_noa = $('#txtNoa').val();
 					var t_where = '';
-					if (t_noa.length > 0)
+					if (t_noa.length > 0 && q_cur != 1 && $('#cmbStype').find("option:selected").text() == '外銷'){
 						t_where = "noa='" + t_noa + "'";
-					q_box("boaj_gu.aspx?" + r_userno + ";" + r_name + ";" + q_time + ";" + t_where, 'boaj', "95%", "95%", q_getMsg('btnBoaj'));
+						q_box("boaj_gu.aspx?" + r_userno + ";" + r_name + ";" + q_time + ";" + t_where, 'boaj', "95%", "95%", q_getMsg('btnBoaj'));
+					}
 				});
 				
 				$('#btnBoaj').val('船務資料');
@@ -328,7 +329,28 @@
 			
 			function q_funcPost(t_func, result) {
 				switch(t_func) {
-					case 'qtxt.query.packing':
+					case 'qtxt.query.packing_ins':
+						if(!emp($('#txtNoa').val())){
+							//判斷get 是否有被產生
+							var t_where = "where=^^ noa='"+$('#txtNoa').val()+"' ^^";
+							q_gt('view_get', t_where, 0, 0, 0, "view_getexists_ins");
+						}
+						break;
+					case 'get_post.post.modi':
+						//重新產生get
+						q_func('qtxt.query.packing_ins', 'vcc.txt,changepacking_gu,' + encodeURI(r_accy) + ';' + encodeURI($('#txtNoa').val())+ ';' + encodeURI(r_name));
+						break;
+					case 'get_post.post.del':
+						//刪除packing&boaj
+						q_func('qtxt.query.delepackboaj', 'vcc.txt,delepackboaj_gu,' + encodeURI(r_accy) + ';' + encodeURI($('#txtNoa').val()));						
+						break;
+					case 'qtxt.query.delepackboaj':
+						//刪除get內容
+						q_func('qtxt.query.delpacking', 'vcc.txt,changepacking_gu,' + encodeURI(r_accy) + ';' + encodeURI($('#txtNoa').val())+ ';' + encodeURI(r_name));
+						break;
+					case 'qtxt.query.delpacking':
+						//刪除vcc
+						_btnOk($('#txtNoa').val(), bbmKey[0], ( bbsHtm ? bbsKey[1] : ''), '', 3);
 						break;
 				}
 			}
@@ -337,8 +359,11 @@
 				var ret;
 				switch (b_pop) {
 					case 'pack':
-						if(!emp($('#txtNoa').val()))
-							q_func('qtxt.query.packing', 'vcc.txt,changepacking_gu,' + encodeURI(r_accy) + ';' + encodeURI($('#txtNoa').val())+ ';' + encodeURI(r_name));
+						if(!emp($('#txtNoa').val())){
+							//判斷get 是否存在
+							var t_where = "where=^^ noa='"+$('#txtNoa').val()+"' ^^";
+							q_gt('view_get', t_where, 0, 0, 0, "view_getexists_modi");
+						}
 						break;
 					case 'ordes':
 						if (q_cur > 0 && q_cur < 4) {
@@ -643,8 +668,15 @@
 								return;
 							}
 						}
-						_btnDele();
+						
+						//_btnDele();
 						Unlock(1);
+						//刪除packing & boaj
+						if (!confirm(mess_dele))
+		                    return;
+		                q_cur = 3;
+		                //清除get
+		                q_func('get_post.post.del', r_accy + ',' + $('#txtNoa').val() + ',0');						
 						break;
 					case 'btnModi':
 						var as = _q_appendData("umms", "", true);
@@ -705,6 +737,20 @@
 						if (as[0] != undefined) {
 							q_tr('txtFloata',as[0].floata);
 							sum();
+						}
+						break;
+					case 'view_getexists_modi':
+						var as = _q_appendData("view_get", "", true);
+						if (as[0] != undefined) {//存在清除get
+							q_func('get_post.post.modi', as[0].accy + ',' + $('#txtNoa').val() + ',0');
+						}else{//不存在直接重新產生get
+							q_func('qtxt.query.packing_ins', 'vcc.txt,changepacking_gu,' + encodeURI(r_accy) + ';' + encodeURI($('#txtNoa').val())+ ';' + encodeURI(r_name));
+						}
+						break;
+					case 'view_getexists_ins':
+						var as = _q_appendData("view_get", "", true);
+						if (as[0] != undefined) {//存在
+							q_func('get_post.post', as[0].accy + ',' + $('#txtNoa').val() + ',1');
 						}
 						break;
 				}
@@ -954,11 +1000,11 @@
 				if($('#cmbStype').val()=='3'){
 					$('.invo').show();
 					$('.vcca').hide();
-					$('#btnBoaj').show();
+					//$('#btnBoaj').show();
 				}else{
 					$('.invo').hide();
 					$('.vcca').show();
-					$('#btnBoaj').hide();
+					//$('#btnBoaj').hide();
 				}
 			}
 

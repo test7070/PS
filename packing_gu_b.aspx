@@ -23,7 +23,7 @@
 		    var bbmMask = [];
 		    var bbsMask = [];
             aPop = new Array(
-            	['txtProductno_', '', 'ucc', 'noa,engpro', 'txtProductno_,txtProduct_', 'ucc_b.aspx']
+            	['txtProductno_', '', 'ucc', 'noa,product,engpro,unit', 'txtProductno_,txtProduct_,txtEngpro_,txtUnit_,txtMount_', 'ucc_b.aspx']
             );
 		    $(document).ready(function () {
 		        bbmKey = [];
@@ -102,6 +102,16 @@
 		        /*for(var j = 0; j < q_bbsCount; j++) {
 		    		$('#lblNo_' + j).text(j + 1);
 				}*/
+				
+				$('#lblNo_s').text('箱數');
+				$('#lblProductno_s').text('品號');
+				$('#lblProduct_s').text('品名');
+				$('#lblMount_s').text('數量');
+				$('#lblUnit_s').text('單位');
+				$('#lblLengthb_s').text('件數');
+				$('#lblNweight_s').text('淨重');
+				$('#lblGweight_s').text('毛重');
+				$('#lblCuft_s').text('才數');
 		    }
 		    
 		    function q_boxClose(s2) { ///   q_boxClose 2/4 
@@ -207,57 +217,62 @@
 			<!--#include file="../inc/pop_modi.inc"-->
 			<table id="tbbs" class='tbbs'  border="2"  cellpadding='2' cellspacing='1' style='width:1000px;'  >
 				<tr style='color:white; background:#003366;' >
-					<td class="td1" align="center" style="width:32px;"><input class="btn"  id="btnPlus" type="button" value='+' style="font-weight: bold;"  /></td>
-					<td class="td2" align="center" style="width:50px;"><a id='lblNo_s'> </a></td>
-					<!--<td class="td3" align="center" style="width:160px;"><a id='lblUno_s'> </a></td>-->
-					<td class="td4" align="center" style="width:200px;"><a id='lblProductno_s'> </a> /<a id='lblProduct_s'> </a></td>
-					<!--<td class="td5" align="center" style="width:150px;"><a id='lblSpec_s'> </a></td>
-					<td class="td5" align="center" style="width:120px;"><a id='lblPackway_s'> </a></td>
-					<td class="td5" align="center" style="width:120px;"><a id='lblPack_s'> </a></td>
-					<td class="td6" align="center" style="width:120px;"><a id='lblSize_s'> </a></td>
-					<td class="td7" align="center" style="width:120px;"><a id='lblDime_s'> </a></td>
-					<td class="td8" align="center" style="width:120px;"><a id='lblLengthb_s'> </a></td>
-					<td class="td8" align="center" style="width:120px;"><a id='lblWidth_s'> </a></td>
-					<td class="td9" align="center" style="width:120px;"><a id='lblHeight_s'> </a></td>-->
-					<td class="td10" align="center" style="width:120px;"><a id='lblMount_s'> </a></td>
-					<td class="td11" align="center" style="width:120px;"><a id='lblNweight_s'> </a></td>
-					<td class="td11" align="center" style="width:120px;"><a id='lblGweight_s'> </a></td>
-					<!--<td class="td12" align="center" style="width:120px;"><a id='lblPrice_s'> </a></td>-->
-					<td class="td11" align="center" style="width:120px;"><a id='lblCuft_s'> </a></td>
-					<td class="td13" align="center"><a id='lblMemo_s'> </a></td>
+					<td align="center" style="width:32px;"><input class="btn"  id="btnPlus" type="button" value='+' style="font-weight: bold;"  /></td>
+					<td align="center" style="width:50px;"><a id='lblNo_s'> </a></td>
+					<!--<td align="center" style="width:160px;"><a id='lblUno_s'> </a></td>-->
+					<td align="center" style="width:200px;"><a id='lblProductno_s'> </a> /<a id='lblProduct_s'> </a></td>
+					<!--<td align="center" style="width:150px;"><a id='lblSpec_s'> </a></td>
+					<td align="center" style="width:120px;"><a id='lblPackway_s'> </a></td>
+					<td align="center" style="width:120px;"><a id='lblPack_s'> </a></td>
+					<td align="center" style="width:120px;"><a id='lblSize_s'> </a></td>
+					<td align="center" style="width:120px;"><a id='lblDime_s'> </a></td>
+					<td align="center" style="width:120px;"><a id='lblLengthb_s'> </a></td>
+					<td align="center" style="width:120px;"><a id='lblWidth_s'> </a></td>
+					<td align="center" style="width:120px;"><a id='lblHeight_s'> </a></td>-->
+					<td align="center" style="width:120px;"><a id='lblMount_s'> </a></td>
+					<td align="center" style="width:50px;"><a id='lblUnit_s'> </a></td>
+					<td align="center" style="width:120px;"><a id='lblLengthb_s'> </a></td>
+					<td align="center" style="width:120px;"><a id='lblNweight_s'> </a></td>
+					<td align="center" style="width:120px;"><a id='lblGweight_s'> </a></td>
+					<!--<td align="center" style="width:120px;"><a id='lblPrice_s'> </a></td>-->
+					<td align="center" style="width:120px;"><a id='lblCuft_s'> </a></td>
+					<!--<td class="td13" align="center"><a id='lblMemo_s'> </a></td>-->
 				</tr>
 				<tr  style='background:#cad3ff;'>
-					<td class="td1" align="center">
+					<td align="center">
 						<input class="btn"  id="btnMinus.*" type="button" value='-' style="font-weight: bold; "  />
 						<input class="txt c1"  id="txtNoa.*" type="hidden"  />
                     	<input id="txtNoq.*" type="hidden" />
 					</td>
-					<td class="td2" style="text-align: center;">
+					<td style="text-align: center;">
 						<!--<a id='lblNo.*'> </a>-->
-						<input class="txt" id="txtNo2.*" type="text" />
+						<input class="txt c1" id="txtNo2.*" type="text" />
 					</td>
-					<!--<td class="td3"><input class="txt" id="txtUno.*" type="text" /></td>-->
-					<td class="td4">
-						<input class="txt" id="txtProductno.*" type="text" />
-						<input class="txt" id="txtProduct.*" type="text" />
+					<!--<td><input class="txt" id="txtUno.*" type="text" /></td>-->
+					<td>
+						<input class="txt c1" id="txtProductno.*" type="text" />
+						<input class="txt c1" id="txtProduct.*" type="text" />
+						<input class="txt c1" id="txtEngpro.*" type="hidden" />
 					</td>
-					<!--<td class="td5"><input class="txt" id="txtSpec.*" type="text" /></td>
-					<td class="td5">
+					<!--<td><input class="txt" id="txtSpec.*" type="text" /></td>
+					<td>
 						<input class="txt" id="txtPackway.*" type="text" style="width:75%;" />
 						<input class="btn"  id="btnPackway.*" type="button" value='.' style="font-weight: bold; "  />
 					</td>
-					<td class="td5"><input class="txt" id="txtPack.*" type="text" /></td>
-					<td class="td6"><input class="txt" id="txtSize.*" type="text" /></td>
-					<td class="td7"><input class="txt num" id="txtDime.*" type="text" /></td>
-					<td class="td8"><input class="txt num" id="txtLengthb.*" type="text" /></td>
-					<td class="td8"><input class="txt num" id="txtWidth.*" type="text" /></td>
-					<td class="td9"><input class="txt num" id="txtHeight.*" type="text" /></td>-->
-					<td class="td10"><input class="txt num" id="txtMount.*" type="text" /></td>
-					<td class="td11"><input class="txt num" id="txtWeight.*" type="text" /></td>
-					<td class="td11"><input class="txt num" id="txtGweight.*" type="text" /></td>
-					<!--<td class="td12"><input class="txt num" id="txtPrice.*" type="text" /></td>-->
-					<td class="td12"><input class="txt num" id="txtCuft.*" type="text" /></td>
-					<td class="td13"><input class="txt" id="txtMemo.*" type="text" /></td>
+					<td><input class="txt" id="txtPack.*" type="text" /></td>
+					<td><input class="txt" id="txtSize.*" type="text" /></td>
+					<td><input class="txt num" id="txtDime.*" type="text" /></td>
+					<td><input class="txt num" id="txtLengthb.*" type="text" /></td>
+					<td><input class="txt num" id="txtWidth.*" type="text" /></td>
+					<td><input class="txt num" id="txtHeight.*" type="text" /></td>-->
+					<td><input class="txt num c1" id="txtMount.*" type="text" /></td>
+					<td><input class="txt c1" id="txtUnit.*" type="text" /></td>
+					<td><input class="txt num c1" id="txtLengthb.*" type="text" /></td>
+					<td><input class="txt num c1" id="txtWeight.*" type="text" /></td>
+					<td><input class="txt num c1" id="txtGweight.*" type="text" /></td>
+					<!--<td><input class="txt num" id="txtPrice.*" type="text" /></td>-->
+					<td><input class="txt num c1" id="txtCuft.*" type="text" /></td>
+					<!--<td class="td13"><input class="txt" id="txtMemo.*" type="text" /></td>-->
 				</tr>
 			</table>
 		</div>

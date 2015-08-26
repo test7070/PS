@@ -15,7 +15,7 @@
             alert("An error occurred:\r\n" + error.Message);
         }
         var q_name="boaj";
-        var q_readonly = ['txtSono','txtWorker','txtWorker2','txtDatea'];
+        var q_readonly = ['txtWorker','txtWorker2','txtDatea'];
         var bbmNum = []; 
         var bbmMask = []; 
         q_sqlCount = 6; brwCount = 6; brwList =[] ; brwNowPage = 0 ; brwKey = 'noa';
@@ -60,7 +60,7 @@
         	if(window.parent.q_name=='vcc'){
 				//讀取嘜頭選項
 				var wParent = window.parent.document;
-				var t_custno= wParent.getElementById("txtCustno").value
+				var t_custno= wParent.getElementById("txtCustno").value;
 				var t_where="where=^^ custno='"+t_custno+"'^^";
 	            q_gt('ucam', t_where, 0, 0, 0, "", r_accy);
            }
@@ -101,14 +101,14 @@
             	case 'check_Noa':
                 	var as = _q_appendData("boaj", "", true);
 					if (as[0] != undefined){
-						alert(q_getMsg('lblNoa')+'已存在!!');
+						alert('船務資料已存在!!');
 						return;
 					}
                 	break;
 				case 'check_btnOk':
 					var as = _q_appendData("boaj", "", true);
 					if (as[0] != undefined){
-						alert(q_getMsg('lblNoa')+'已存在!!');
+						alert('船務資料已存在!!');
 						return;
 					}else{
 						wrServer($('#txtNoa').val());
@@ -126,6 +126,34 @@
             				$('#cmbMarkno').val(abbm[0].markno);
             		}
                     break;
+				case 'vccnogetordei':
+					var as = _q_appendData("view_vcc", "", true);
+					if(as[0] != undefined){
+						var t_ordeno= as[0].ordeno;
+						var t_where="where=^^ noa='"+t_ordeno+"'^^";
+			            q_gt('ordei', t_where, 0, 0, 0, "", r_accy);
+					}
+					break;
+				case 'ordei':
+					var as = _q_appendData("ordei", "", true);
+					if(as[0] != undefined){
+						$('#txtNotify').val(as[0].notify);
+						$('#txtTrancompno').val(as[0].trancompno);
+						$('#txtTrancomp').val(as[0].trancomp);
+						$('#txtInspection_compno').val(as[0].inspection_compno);
+						$('#txtInspection_comp').val(as[0].inspection_comp);
+						$('#txtBcompno').val(as[0].bcompno);
+						$('#txtBcomp').val(as[0].bcomp);
+						$('#txtBdock').val(as[0].bdock);
+						$('#txtEdock').val(as[0].edock);
+						$('#txtGoal').val(as[0].goal);
+						$('#cmbMarkno').val(as[0].markno);
+						$('#txtMain').val(replaceAll(as[0].main,'chr(10)','\n'));
+						$('#txtSide').val(replaceAll(as[0].side,'chr(10)','\n')) ;
+						$('#txtMain').val($('#txtMain').val().replace(/　/g,' '));
+						$('#txtSide').val($('#txtSide').val().replace(/　/g,' '));
+					}
+					break;
                 case q_name: 
                 		if (q_cur == 4)  
                         q_Seek_gtPost();
@@ -139,11 +167,24 @@
             q_box('boaj_s.aspx', q_name + '_s', "500px", "400px", q_getMsg( "popSeek"));
         }
 
-
         function btnIns() {
             _btnIns();
             $('#txtExportno').focus();
             $('#txtDatea').val(q_date());
+            var t_key = q_getHref();
+            if(t_key[1] != undefined){
+				$('#txtNoa').val(t_key[1]);
+			}
+			if(window.parent.q_name=='vcc'){
+				//讀取嘜頭選項
+				var wParent = window.parent.document;
+				var t_ordeno= wParent.getElementById("txtOrdeno").value;
+				var t_where="where=^^ noa='"+t_ordeno+"'^^";
+	            q_gt('ordei', t_where, 0, 0, 0, "", r_accy);
+           }else if ($('#txtNoa').val().length>0){
+           		var t_where="where=^^ noa='"+$('#txtNoa').val()+"'^^";
+	            q_gt('view_vcc', t_where, 0, 0, 0, "vccnogetordei", r_accy);
+           }
         }
 
         function btnModi() {
@@ -157,10 +198,12 @@
         function btnPrint() {
  
         }
+        
         function q_stPost() {
                 if (!(q_cur == 1 || q_cur == 2))
                     return false;
         }
+        
         function btnOk() {
         	if(q_cur==1)
 				$('#txtWorker').val(r_name);
@@ -170,11 +213,9 @@
 			$('#txtMain').val($('#txtMain').val().replace(/ /g,'　'))
 			$('#txtSide').val($('#txtSide').val().replace(/ /g,'　'))
 			
-          	if(q_cur==1){
-				var t_key = q_getHref();
-                if(t_key[1] != undefined)
-                $('#txtNoa').val(t_key[1]);
-                wrServer($('#txtNoa').val());
+			if(q_cur==1){
+				t_where="where=^^ noa='"+$('#txtNoa').val()+"'^^";
+                q_gt('boaj', t_where, 0, 0, 0, "check_btnOk", r_accy);
 			}else
 				wrServer($('#txtNoa').val());
         }
@@ -390,7 +431,7 @@
             </tr>
         </table>
         </div>
-        <div class='dbbm' style="width: 75%;float: left;">
+        <div class='dbbm' style="width: 100%;float: left;">
         <table class="tbbm"  id="tbbm"   border="0" cellpadding='2'  cellspacing='5'>
           <tr style="height:1px;">
 			  <td><input id="txtNoa" type="hidden" class="txt c1"/></td>
@@ -464,6 +505,10 @@
             <tr>
                <td><span> </span><a id="lblBillmemo" class="lbl"> </a></td>
                <td colspan="5"><input id="txtBillmemo" type="text" class="txt c1"/></td>
+            </tr>
+            <tr>
+               <td><span> </span><a id="lblDeivery_addr" class="lbl"> </a></td>
+               <td colspan="5"><input id="txtDeivery_addr" type="text" class="txt c1"/></td>
             </tr>
             <tr>
                <td><span> </span><a id="lblBdock" class="lbl"> </a></td>
