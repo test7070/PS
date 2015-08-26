@@ -96,9 +96,11 @@
 
 				var t_where = "where=^^ 1=1 group by post,addr^^";
 				q_gt('custaddr', t_where, 0, 0, 0, "");
-
+				
+				//$('#btnOrdei').hide();
 				$('#btnOrdei').click(function() {
-					if (q_cur != 1 && $('#cmbStype').find("option:selected").text() == '外銷')
+					var t_noa = $('#txtNoa').val();
+					if (t_noa.length > 0 && q_cur != 1 && $('#cmbStype').find("option:selected").text() == '外銷')
 						q_box("ordei.aspx?" + r_userno + ";" + r_name + ";" + q_time + ";noa='" + $('#txtNoa').val() + "';" + r_accy + ";" + q_cur, 'ordei', "95%", "95%", q_getMsg('popOrdei'));
 				});
 				$('#btnQuat').click(function() {
@@ -232,6 +234,11 @@
 			function q_boxClose(s2) {
 				var ret;
 				switch (b_pop) {
+					case 'orde2ordc':
+						//更新採購單號
+						var t_where = "where=^^ quatno='" + $('#txtNoa').val() + "' ^^";
+						q_gt('view_ordc', t_where, 0, 0, 0, "orde_ordc", r_accy);
+						break;
 					case 'quats':
 						if (q_cur > 0 && q_cur < 4) {
 							b_ret = getb_ret();
@@ -269,7 +276,7 @@
 								q_box("ordb.aspx?;;;charindex(noa,'" + noa + "')>0;" + r_accy, 'ordb', "95%", "95%", q_getMsg("popOrdb"));
 								break;
 							case 'ordcno':
-								q_box("ordc_gu.aspx?;;;noa='" + noa + "';" + r_accy, 'ordc', "95%", "95%", q_getMsg("popOrdc"));
+								q_box("ordc_gu.aspx?;;;charindex(noa,'" + noa + "')>0;" + r_accy, 'ordc', "95%", "95%", q_getMsg("popOrdc"));
 								break;
 							case 'quatno':
 								q_box("quat.aspx?;;;noa='" + noa + "';" + r_accy, 'quat', "95%", "95%", q_getMsg("popQuat"));
@@ -482,6 +489,15 @@
 							q_tr('txtFloata',as[0].floata);
 							sum();
 						}
+						break;
+					case 'orde_ordc':
+						var as = _q_appendData("view_ordc", "", true);
+						var t_ordcno="";
+						for ( i = 0; i < as.length; i++) {
+							t_ordcno=t_ordcno+(t_ordcno.length>0?',':'')+as[i].noa;
+						}
+						$('#txtOrdcno').val(t_ordcno);
+						abbm[q_recno]['ordcno'] = t_ordcno;
 						break;
 					case q_name:
 						if (q_cur == 4)
@@ -709,7 +725,7 @@
 
 			function btnPrint() {
                 var t_where = "noa='" + $.trim($('#txtNoa').val()) + "'";
-               	//q_box("z_ordep.aspx?" + r_userno + ";" + r_name + ";" + q_time + ";" + t_where, '', "95%", "95%", q_getMsg('popPrint'));
+               	q_box("z_ordep.aspx?" + r_userno + ";" + r_name + ";" + q_time + ";" + t_where, '', "95%", "95%", q_getMsg('popPrint'));
 			}
 
 			function wrServer(key_value) {
@@ -1174,7 +1190,7 @@
 					</td>
 					<td align="center">
 						<input class="txt c6" id="txtProductno.*" maxlength='30'type="text" style="width:98%;" />
-						<input class="btn" id="btnProduct.*" type="button" value='...' style=" font-weight: bold;" />
+						<input class="btn" id="btnProduct.*" type="button" value='.' style=" font-weight: bold;" />
 						<input class="txt c6" id="txtNo2.*" type="text" />
 					</td>
 					<td>
