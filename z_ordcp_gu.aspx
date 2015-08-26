@@ -44,12 +44,16 @@
                     }, {/*1-3 [6]*/
                         type : '6',
                         name : 'xcontract'
+                    },{/*[7]*/
+                        type : '0',
+                        name : 'http',
+                        value:location.host
                     }]
                 });
                 q_popAssign();
                 
                 if(q_getHref()[1]!=undefined)
-                	$('#txtXnoa').val(q_getHref()[1]);
+                	$('#txtXquatno').val(q_getHref()[1]);
 	        }
 
             function q_boxClose(s2) {
