@@ -234,6 +234,11 @@
 			function q_boxClose(s2) {
 				var ret;
 				switch (b_pop) {
+					case 'orde2ordc':
+						//更新採購單號
+						var t_where = "where=^^ quatno='" + $('#txtNoa').val() + "' ^^";
+						q_gt('view_ordc', t_where, 0, 0, 0, "orde_ordc", r_accy);
+						break;
 					case 'quats':
 						if (q_cur > 0 && q_cur < 4) {
 							b_ret = getb_ret();
@@ -271,7 +276,7 @@
 								q_box("ordb.aspx?;;;charindex(noa,'" + noa + "')>0;" + r_accy, 'ordb', "95%", "95%", q_getMsg("popOrdb"));
 								break;
 							case 'ordcno':
-								q_box("ordc_gu.aspx?;;;noa='" + noa + "';" + r_accy, 'ordc', "95%", "95%", q_getMsg("popOrdc"));
+								q_box("ordc_gu.aspx?;;;charindex(noa,'" + noa + "')>0;" + r_accy, 'ordc', "95%", "95%", q_getMsg("popOrdc"));
 								break;
 							case 'quatno':
 								q_box("quat.aspx?;;;noa='" + noa + "';" + r_accy, 'quat', "95%", "95%", q_getMsg("popQuat"));
@@ -484,6 +489,15 @@
 							q_tr('txtFloata',as[0].floata);
 							sum();
 						}
+						break;
+					case 'orde_ordc':
+						var as = _q_appendData("view_ordc", "", true);
+						var t_ordcno="";
+						for ( i = 0; i < as.length; i++) {
+							t_ordcno=t_ordcno+(t_ordcno.length>0?',':'')+as[i].noa;
+						}
+						$('#txtOrdcno').val(t_ordcno);
+						abbm[q_recno]['ordcno'] = t_ordcno;
 						break;
 					case q_name:
 						if (q_cur == 4)

@@ -374,7 +374,7 @@
 							//ret = q_gridAddRow(bbsHtm, 'tbbs', 'txtProductno,txtProduct,txtSpec,txtSize,txtDime,txtWidth,txtLengthb,txtUnit,txtOrdeno,txtNo2,txtPrice,txtMount,txtMemo'
 							//, b_ret.length, b_ret, 'productno,product,spec,size,dime,width,lengthb,unit,noa,no2,price,mount,memo', 'txtProductno,txtProduct,txtSpec');
 							ret = q_gridAddRow(bbsHtm, 'tbbs', 'txtProduct,txtSpec,txtUnit,txtOrdeno,txtNo2,txtPrice,txtMount,txtMemo'
-							, b_ret.length, b_ret, 'product,spec,unit,noa,no2,price,mount,memo', 'txtProductno,txtProduct,txtSpec');
+							, b_ret.length, b_ret, 'product,spec,unit,noa,no2,price,mount,memo', 'txtProduct,txtSpec');
 							//寫入訂單號碼
 							var t_oredeno = '';
 							for (var i = 0; i < b_ret.length; i++) {
@@ -632,7 +632,7 @@
 							t_post2 = t_post2+(t_post2.length>0?';':'')+as[i].post2;
 							t_addr2 = t_addr2+(t_addr2.length>0?';':'')+as[i].addr2;
 						}
-						$('#txtMemo').val(t_memo);
+						//$('#txtMemo').val(t_memo);
 						$('#txtPost').val(t_post);
 						$('#txtAddr').val(t_addr);
 						$('#txtPost2').val(t_post2);
@@ -1431,16 +1431,16 @@
 						<input class="btn"  id="btnPlus" type="button" value='＋' style="font-weight: bold;width:" />
 					</td>
 					<!--<td align="center" style="width:180px"><a id='lblProductno_s'> </a></td>-->
-					<td align="center" style="width:180px;"><a id='lblProduct_s'> </a></td>
+					<td align="center" style="width:250px;"><a id='lblProduct_s'> </a></td>
 					<td align="center" style="width:95px;" class="isStyle"><a id='lblStyle_s'> </a></td>
 					<td align="center" style="width:40px;"><a id='lblUnit_s'> </a></td>
-					<td align="center" style="width:80px;"><a id='lblMount_s'> </a></td>
-					<td align="center" style="width:80px;"><a id='lblWeight_s'> </a></td>
-					<td align="center" style="width:80px;"><a id='lblTheory_s'> </a></td>
-					<td align="center" style="width:80px;"><a id='lblPrice_s'> </a></td>
-					<td align="center" style="width:80px;"><a id='lblTotal_s'> </a></td>
-					<td align="center" style="width:120px;"><a id='lblStore_s'> </a></td>
-					<td align="center" style="width:100px;" class="isRack"><a id='lblRackno_s'> </a></td>
+					<td align="center" style="width:100px;"><a id='lblMount_s'> </a></td>
+					<td align="center" style="width:100px;"><a id='lblWeight_s'> </a></td>
+					<td align="center" style="width:100px;"><a id='lblTheory_s'> </a></td>
+					<td align="center" style="width:100px;"><a id='lblPrice_s'> </a></td>
+					<td align="center" style="width:100px;"><a id='lblTotal_s'> </a></td>
+					<!--<td align="center" style="width:120px;"><a id='lblStore_s'> </a></td>
+					<td align="center" style="width:100px;" class="isRack"><a id='lblRackno_s'> </a></td>-->
 					<td align="center" style="width:150px;"><a id='lblMemo_s'> </a></td>
 					<!--<td align="center" style="width:40px;"><a id='lblRecord_s'> </a></td>
 					<td align="center" style="width:40px;"><a id='lblStk_s'> </a></td>-->
@@ -1466,7 +1466,7 @@
 					<td><input id="txtTheory.*" type="text" class="txt num c1"/></td>
 					<td><input id="txtPrice.*" type="text" class="txt num c1"/></td>
 					<td><input id="txtTotal.*" type="text" class="txt num c1"/></td>
-					<td>
+					<!--<td>
 						<input id="txtStoreno.*" type="text" class="txt c1" style="width: 75%"/>
 						<input class="btn"  id="btnStoreno.*" type="button" value='.' style=" font-weight: bold;" />
 						<input id="txtStore.*" type="text" class="txt c1"/>
@@ -1474,7 +1474,7 @@
 					<td class="isRack">
 						<input class="btn"  id="btnRackno.*" type="button" value='.' style="float:left;" />
 						<input id="txtRackno.*" type="text" class="txt c1" style="width: 70%"/>
-					</td>
+					</td>-->
 					<td>
 						<input id="txtMemo.*" type="text" class="txt c1"/>
 						<select id="combOrdelist.*" style="width: 10%;"> </select>
