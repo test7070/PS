@@ -5,35 +5,42 @@ declare @t_exnoa nvarchar(20)
 
 set @t_bxnoa = case when '#non' = [2] then '' else [2] end
 set @t_exnoa = case when '#non' = [3] then CHAR(255) else [3] end
-
 ---------------------------------------------------------------------------------
 SET QUOTED_IDENTIFIER OFF
 
 declare @tmp table(
 	gno nvarchar(1),
-	
-	c_addr nvarchar(max),
-	c_tel nvarchar(20),
-	c_fax nvarchar(20),
-	
+	logo nvarchar(100),
 	rec int,
 	noa nvarchar(20),
 	datea nvarchar(10),
 	comp nvarchar(100),
-	tel nvarchar(90),
+	custtel nvarchar(90),
 	ordeno nvarchar(50),
 	product nvarchar(200),
 	mount float,
 	weight float,
 	unit nvarchar(10),
-	width float,
-	addr nvarchar(90)
+	theory float,
+	addr nvarchar(90),
+	cldate nvarchar(20),
+	tel nvarchar(90),
+	mark nvarchar(50),
+	trancomp nvarchar(100),
+	boat nvarchar(100),
+	sono nvarchar(50),
+	goal nvarchar(200)
+	
 )
 insert into @tmp
-select '0',c.addr,c.tel,c.fax,ROW_NUMBER() over (partition by a.noa order by a.noa),a.noa,b.datea,a.comp,a.tel,b.ordeno,REPLACE(b.product,'~#$~#$','"'),b.mount,b.weight,b.unit,b.width,a.addr
+select '0','',ROW_NUMBER() over (partition by a.noa order by a.noa),a.noa,
+	   b.datea,a.comp,a.tel,b.ordeno,REPLACE(b.product,'~#$~#$','"'),b.mount,b.weight,b.unit,b.theory,
+	   c.deivery_addr,c.cldate,c.bcomp+' '+d.tel,e.namea,c.trancomp,c.boatname+'/'+c.ship,c.sono,c.goal
 from view_vcc a
 left join view_vccs b on a.noa=b.noa
-left join acomp c on a.cno = c.noa
+left join boaj c on a.noa = c.noa
+left join tgg d on c.bcompno = d.noa
+left join ucam e on c.markno = e.noa
 where (a.noa between @t_bxnoa and @t_exnoa)
 
 declare @rec int
@@ -52,8 +59,8 @@ begin
 
 	if(@noa != @xnoa)
 	begin
-		insert into @tmp(gno,rec,noa,addr)
-		select '1',rec,noa,addr from @tmp where rec = @rec and noa = @noa
+		insert into @tmp(gno,rec,noa,addr,cldate,tel,mark,trancomp,boat,sono,goal)
+		select '1',rec,noa,addr,cldate,tel,mark,trancomp,boat,sono,goal from @tmp where rec = @rec and noa = @noa
 	end
 	
 	set @xnoa = @noa
@@ -65,7 +72,141 @@ close cursor_table
 deallocate cursor_table 
 
 update @tmp set datea = dbo.split(datea,'/',0)+'年'+dbo.split(datea,'/',1)+'月'+dbo.split(datea,'/',2)+'日'
+update @tmp set logo = '<img width="160px" src="http://59.125.143.171/images/logo_gu.png">'
 
 select
-	gno,c_addr,c_tel,c_fax,rec,noa,datea,comp,tel,ordeno,product,mount,dbo.getComma(weight,0)+unit weight,width,addr
+	*,dbo.getComma(mount,0)+unit mnt,dbo.getComma(weight,2)+'KGS' weit
 from @tmp order by noa,gno  ;
+
+
+
+--*******************************************************************************
+z_vccp_gu03:--z_vccp_gu03
+declare @t_bxnoa nvarchar(20)
+declare @t_exnoa nvarchar(20)
+
+
+set @t_bxnoa = case when '#non' = [2] then '' else [2] end
+set @t_exnoa = case when '#non' = [3] then CHAR(255) else [3] end
+---------------------------------------------------------------------------------
+declare @tmp table(
+	gno nvarchar(1),
+	rec int,
+	comp nvarchar(100),
+	contract nvarchar(30),
+	ordeno nvarchar(30),
+	customs nvarchar(50),
+	caseno nvarchar(30),
+	no2 nvarchar(50),
+	productno nvarchar(30),
+	product nvarchar(100),
+	mount float,
+	unit nvarchar(50),
+	mnt float,
+	weight float,
+	gweight float,
+	cuft float
+)
+
+insert into @tmp
+select '9',ROW_NUMBER() over (order by b.ordeno,a.productno),b.comp,c.contract,b.ordeno,d.customs,d.caseno,a.no2,a.productno,a.product,a.mount,a.unit,0,a.weight,a.gweight,a.cuft
+from packing a
+left join view_vcc b on a.noa = b.noa
+left join view_orde c on b.ordeno = c.noa
+left join boaj d on a.noa = d.noa
+where (a.noa between @t_bxnoa and @t_exnoa)
+
+declare @rec int
+declare @ordeno nvarchar(30)
+declare @xordeno nvarchar(30)
+declare @productno nvarchar(30)
+declare @xproductno nvarchar(30)
+declare @product nvarchar(100)
+declare @no2 nvarchar(30)
+declare @mount float
+declare @unit nvarchar(50)
+declare @mnt float
+declare @weight float
+declare @gweight float
+declare @cuft float
+
+declare @str nvarchar(100)
+declare @cnt int
+declare @i int
+
+set @xordeno = 'xxxxxxxxxx'
+set @xproductno = 'xxxxxxxxxx'
+
+declare cursor_table cursor for 
+select rec,ordeno,productno,product from @tmp where gno = '9'
+open cursor_table 
+fetch next from cursor_table 
+into @rec,@ordeno,@productno,@product
+while(@@FETCH_STATUS <> -1) 
+begin
+	if(@ordeno != @xordeno)
+	begin
+		insert into @tmp(gno,comp,contract,ordeno,customs,caseno)
+		select DISTINCT '8',comp,contract,@ordeno,customs,caseno from @tmp where ordeno = @ordeno
+	end
+	if(@productno != @xproductno)
+	begin	
+		set @cnt = (select COUNT(*) from @tmp where gno = '9' and ordeno = @ordeno and productno = @productno)
+			
+		set @no2 = (select no2 from @tmp where rec = @rec and ordeno = @ordeno and productno = @productno)
+		set @mount = (select mount from @tmp where rec = @rec and ordeno = @ordeno and productno = @productno)
+		set @unit = (select unit from @tmp where rec = @rec and ordeno = @ordeno and productno = @productno)
+		set @mnt = @cnt
+		set @weight = (select weight from @tmp where rec = @rec and ordeno = @ordeno and productno = @productno)
+		set @gweight = (select gweight from @tmp where rec = @rec and ordeno = @ordeno and productno = @productno)
+		set @cuft = (select cuft from @tmp where rec = @rec and ordeno = @ordeno and productno = @productno)
+		
+		insert into @tmp(gno,comp,contract,ordeno,customs,caseno,productno,product,no2,mount,unit,mnt,weight,gweight,cuft)
+		select '1',comp,contract,@ordeno,customs,caseno,@productno,@product,@no2,@mount,@unit,@mnt,@weight,@gweight,@cuft from @tmp where gno = '8' 
+		
+		if(@cnt > 1)
+		begin
+			set @i = 0
+			set @no2 = ''
+			while(@i < @cnt)
+			begin
+				if(@i = 0)
+					set @no2 = @no2 + (select no2 from @tmp where rec = @rec+@i and ordeno = @ordeno and productno = @productno)
+				else
+					set @no2 = @no2 + '-' + (select no2 from @tmp where rec = @rec+@i and ordeno = @ordeno and productno = @productno)		
+				set @i = @i + 1
+			end		
+			set @mount = (select mount from @tmp where rec = @rec and ordeno = @ordeno and productno = @productno)*@cnt
+			set @unit = (select unit from @tmp where rec = @rec and ordeno = @ordeno and productno = @productno)
+			set @weight = (select weight from @tmp where rec = @rec and ordeno = @ordeno and productno = @productno)*@cnt
+			set @gweight = (select gweight from @tmp where rec = @rec and ordeno = @ordeno and productno = @productno)*@cnt
+			set @cuft = (select cuft from @tmp where rec = @rec and ordeno = @ordeno and productno = @productno)*@cnt
+			
+			update @tmp set mount = @mount where gno = '1' and ordeno = @ordeno and no2 = dbo.split(@no2,'-',0)
+			
+			insert into @tmp(gno,comp,contract,ordeno,customs,caseno,productno,product,no2,mount,unit,weight,gweight,cuft)
+			select '2',comp,contract,@ordeno,customs,caseno,@productno,@product,@no2,@mount,@unit,@weight,@gweight,@cuft from @tmp where gno = '8' 
+		end
+	end
+	
+	
+	
+	set @xordeno = @ordeno	
+	set @xproductno = @productno
+	
+	fetch next from cursor_table 
+	into @rec,@ordeno,@productno,@product	
+end 
+close cursor_table 
+deallocate cursor_table 
+
+delete @tmp where gno = '9' or gno = '8'
+
+insert into @tmp(gno,ordeno,mount,weight,gweight,cuft)
+select '3',ordeno,SUM(mount),SUM(weight),SUM(gweight),SUM(cuft)
+from @tmp where gno = '1' group by ordeno
+
+select 
+	gno,comp,contract,ordeno,customs,caseno,no2,productno,product,
+	dbo.getComma(mount,2)mount,unit,mnt,dbo.getComma(weight,2) weight,dbo.getComma(gweight,2) gweight,dbo.getComma(cuft,2) cuft 
+from @tmp order by ordeno,dbo.split(no2,'-',0) ;
