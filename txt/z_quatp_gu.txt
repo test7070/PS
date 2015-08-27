@@ -1,28 +1,34 @@
 ﻿z_quatp_gu01:--z_quatp_gu01
 
 declare @t_noa nvarchar(50)
+declare @t_ip nvarchar(20)
+
 
 set @t_noa = case when '#non' = [1] then '' else [1] end
+set @t_ip = case when '#non' = '[2]' then '' else '[2]' end
 --------------------------------------------------------------------------------
 SET QUOTED_IDENTIFIER OFF
 
 declare @tmp table(
 	gno nvarchar(1),
 	rec int,
+	logo nvarchar(max),
 	q_productno nvarchar(30),
 	q_product nvarchar(100),
 	product nvarchar(100),
 	spec1 nvarchar(50),
 	spec2 nvarchar(50),
-	memo nvarchar(50),
+	memo nvarchar(max),
 	total float
 )
 insert into @tmp
-select '0',ROW_NUMBER() over (partition by LEFT(a.productno,7) order by a.product),a.productno,REPLACE(a.product,'~#$',"'"),b.product,a.spec,b.spec,a.memo,a.total
+select '0',ROW_NUMBER() over (partition by LEFT(a.productno,7) order by a.product),'',a.productno,REPLACE(a.product,'~#$',"'"),b.product,a.spec,b.spec,a.memo,a.total
 from view_quats a
-left join ucas b on a.productno = b.noa 
+left join ucas b on a.productno = b.noa
 left join ucc c on a.productno = c.noa
 where a.noa = @t_noa
+
+
 
 update @tmp set gno = case when product is not null then '8' else '4' end 
 update @tmp set product = dbo.split(dbo.split(product,':',1),' ',0) 
@@ -33,25 +39,38 @@ declare @q_xproductno nvarchar(30)
 declare @product nvarchar(100)
 declare @xproduct nvarchar(100)
 declare @spec nvarchar(50)
+declare @memo nvarchar(max)
 declare @cnt int
 declare @max int
 declare @i int
 declare @str nvarchar(100)
+declare @img nvarchar(max)
 
 set @q_xproductno = 'xxxxxx'
 set @xproduct = 'xxxxxx'
  
 declare cursor_table cursor for 
-select rec,q_productno,product from @tmp where gno = '8' 
+select rec,q_productno,product,memo from @tmp where gno = '8' 
 open cursor_table 
 fetch next from cursor_table 
-into @rec,@q_productno,@product
+into @rec,@q_productno,@product,@memo
 while(@@FETCH_STATUS <> -1) 
 begin
 	if(@q_productno != @q_xproductno)
 	begin
+		set @cnt = LEN(@memo) - LEN(REPLACE(@memo,'{',''))
+		set @i =0
+		set @img = ''
+		while (@i < @cnt)
+		begin
+			set @img = @img +'<img width="140px" src="http://'+@t_ip+'/images/upload/'+@q_productno+'_'+dbo.split(dbo.split(@memo,'{',@i+1),'}',0)+'.JPG">'
+			print @img
+			set @i = @i + 1
+		end	
+		set @memo = dbo.split(@memo,'{',0)+'<br>'+@img
+		
 		insert into @tmp(gno,q_productno,q_product,memo,total)
-		select '1',q_productno,q_product,memo,total from @tmp where gno = '8' and rec = @rec
+		select '1',q_productno,q_product,@memo,total from @tmp where gno = '8' and rec = @rec
 	end
 	if(@product != @xproduct)
 	begin 			
@@ -85,7 +104,7 @@ begin
 	set @xproduct = @product
 	
 	fetch next from cursor_table 
-	into @rec,@q_productno,@product
+	into @rec,@q_productno,@product,@memo
 end 
 close cursor_table 
 deallocate cursor_table 
@@ -98,26 +117,39 @@ declare @q_xproduct nvarchar(100)
 set @q_xproduct = 'xxxxxx'
 
 declare cursor_table cursor for 
-select rec,q_productno,q_product from @tmp where gno = '4' 
+select rec,q_productno,q_product,memo from @tmp where gno = '4' 
 open cursor_table 
 fetch next from cursor_table 
-into @rec,@q_productno,@q_product
+into @rec,@q_productno,@q_product,@memo
 while(@@FETCH_STATUS <> -1) 
 begin
 	if(@q_product != @q_xproduct)
 	begin 
+		set @cnt = LEN(@memo) - LEN(REPLACE(@memo,'{',''))
+		set @i =0
+		set @img = ''
+		while (@i < @cnt)
+		begin
+			set @img = @img +'<img width="140px" src="http://'+@t_ip+'/images/upload/'+@q_productno+'_'+dbo.split(dbo.split(@memo,'{',@i+1),'}',0)+'.JPG">'
+			print @img
+			set @i = @i + 1
+		end	
+		set @memo = dbo.split(@memo,'{',0)+'<br>'+@img
+			
 		insert into @tmp(gno,q_productno,q_product,memo)
-		select '3',q_productno,q_product,memo from @tmp where gno = '4' and rec = @rec and q_product = @q_product
+		select '3',q_productno,q_product,@memo from @tmp where gno = '4' and rec = @rec and q_product = @q_product
 	end	
 	set @q_xproduct = @q_product
 	
 	fetch next from cursor_table 
-	into @rec,@q_productno,@q_product	
+	into @rec,@q_productno,@q_product,@memo
 end 
 close cursor_table 
 deallocate cursor_table 
  
+update @tmp set logo = '<img width="160px" src="http://59.125.143.171/images/logo_gu.png">'
+ 
 select 
-	gno,DENSE_RANK() over (order by left(q_productno,7)) rec,
+	gno,DENSE_RANK() over (order by left(q_productno,7)) rec,logo,
 	q_productno,q_product,product,spec1,memo,dbo.getComma(total,0) total 
 from @tmp order by q_productno,gno  ;

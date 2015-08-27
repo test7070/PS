@@ -4,11 +4,13 @@ declare @t_btggno nvarchar(20)
 declare @t_etggno nvarchar(20)
 declare @t_quatno nvarchar(30)
 declare @t_contract nvarchar(30)
+declare @t_ip nvarchar(20)
 
 set @t_btggno = case when '#non'=[3] then '' else [3] end
 set @t_etggno = case when '#non'=[4] then char(255) else [4] end
 set @t_quatno = case when '#non' = [5] then '' else [5] end
 set @t_contract = case when '#non' = [6] then '' else [6] end
+set @t_ip = case when '#non' = '[7]' then '' else '[7]' end
 --------------------------------------------------------------------------------
 SET QUOTED_IDENTIFIER OFF
 
@@ -16,261 +18,74 @@ declare @tmp table(
 	gno nvarchar(1),
 	rec int,
 	
-	c_serial nvarchar(10),
-	c_email nvarchar(100),
-	c_addr1 nvarchar(max),
-	c_addr2 nvarchar(max),
-	c_tel nvarchar(50),
-	c_fax nvarchar(50),	
+	logo nvarchar(max),
 	
 	tggno nvarchar(20),
 	tgg nvarchar(100),
 	quatno nvarchar(30),
 	trandate nvarchar(10),
-	q_productno nvarchar(100),
-	q_product nvarchar(max),
+	productno nvarchar(30),
 	product nvarchar(100),
-	spec1 nvarchar(100),
-	spec2 nvarchar(100),
+	spec nvarchar(40),
 	mount float,
-	price float
+	price float,
+	memo nvarchar(max)
 )
 
 insert into @tmp
-select '9',ROW_NUMBER() over (order by a.tggno),e.serial,e.email,e.addr,e.addr_invo,e.tel,e.fax,
-	   a.tggno,a.tgg,a.quatno,a.trandate,b.productno,REPLACE(b.product,'~#$~#$','"'),c.product,d.spec,c.spec,b.mount,b.price
+select '1',ROW_NUMBER() over (order by a.tggno),'',
+	   a.tggno,a.tgg,a.quatno,a.trandate,b.productno,REPLACE(b.product,'~#$~#$','"'),c.spec,b.mount,b.price,b.memo
 from view_ordc a
 left join view_ordcs b on a.noa = b.noa
-left join ucas c on b.productno = c.noa
-left join ucc d on b.productno = d.noa
-left join acomp e on a.cno = e.noa
+left join ucc c on b.productno = c.noa
 where (a.tggno between @t_btggno and @t_etggno) and (a.quatno is not null) and
 	  (LEN(@t_quatno) = 0 or a.quatno = @t_quatno) and (LEN(@t_contract) = 0 or a.contract = @t_contract)
 order by a.tggno
 
-insert into @tmp (gno,quatno,tggno,tgg,trandate)
-select '1',max(quatno),MAX(tggno),MAX(tgg),MAX(trandate) from @tmp group by quatno,tggno
 
-insert into @tmp(gno,c_serial,c_email,c_addr1,c_addr2,c_tel,c_fax,tggno,tgg)
-select '0',MAX(c_serial),MAX(c_email),MAX(c_addr1),MAX(c_addr2),MAX(c_tel),MAX(c_fax),MAX(tggno),MAX(tgg) from @tmp group by tggno
+insert into @tmp(gno,tggno,tgg,quatno)
+select '0',MAX(tggno),MAX(tgg),MAX(quatno) from @tmp group by tggno
 
-update @tmp set gno = case when product is not null then '7' else '8' end where gno = '9'
-update @tmp set product = dbo.split(dbo.split(product,':',1),' ',0) where gno = '7'
+insert into @tmp(gno,tggno,tgg,quatno)
+select '2',MAX(tggno),MAX(tgg),MAX(quatno) from @tmp group by tggno
 
-update @tmp set product = q_product where gno = '8'
-update @tmp set spec2 = spec1 where gno = '8'
-
---
-declare @gno nvarchar(1)
 declare @rec int
-declare @tggno nvarchar(30)
-declare @quatno nvarchar(30)
-declare @q_productno nvarchar(30)
-declare @q_product nvarchar(100)
-declare @q_xproductno nvarchar(30)  
-declare @product nvarchar(100)
-declare @xproduct nvarchar(100)
-declare @spec nvarchar(50)
-declare @str nvarchar(100)
+declare @productno nvarchar(30)
+declare @memo nvarchar(max)
+declare @img nvarchar(max)
 declare @cnt int
-declare @max int
 declare @i int
-declare @no int
-
-set @q_xproductno = 'xxxxxx'
-set @xproduct = 'xxxxxx'
-set @no = 0
 
 declare cursor_table cursor for 
-select gno,rec,tggno,quatno,q_productno,q_product,product from @tmp where gno = '7' or gno = '8' order by tggno
+select rec,productno,memo from @tmp where gno = '1' and (memo is not null and LEN(memo) != 0)
 open cursor_table 
 fetch next from cursor_table 
-into @gno,@rec,@tggno,@quatno,@q_productno,@q_product,@product
-while(@@FETCH_STATUS <> -1) 
-begin	
-	if(@product != @xproduct)
-	begin 	
-		set @no = @no +1
-		if (@gno = '7')
-		begin
-			set @cnt = (select COUNT(*) from @tmp where gno = '7' and product = @product)
-			set @max = (select MAX(rec) from @tmp where gno = '7' and product = @product)
-			set @i = 0
-			set @str = ''
-			while(@i < @cnt)
-			begin
-			set @spec = (select spec2 from @tmp where gno = '7' and rec = @rec+@i and quatno = @quatno and product = @product)
-			if(RIGHT(@spec,2) = 'mm' and @rec+@i != @max)
-			begin
-				set @spec = REPLACE(@spec,'mm','')
-			end
-				if(@i = 0)
-				begin
-					set @str = @str + @spec
-					set @i = @i +1	
-				end	
-				else
-				begin	
-					set @str = @str + '-' + @spec
-					set @i = @i +1
-				end
-			end		
-			insert into @tmp(gno,rec,quatno,tggno,tgg,trandate,q_productno,q_product,product,spec1)
-			select '2',@no,quatno,tggno,tgg,trandate,@q_productno,@q_product+':',@product+':',@str from @tmp where gno = '1' and quatno = @quatno and tggno = @tggno
-		end	
-		else if (@gno = '8')
-		begin
-			set @cnt = (select COUNT(*) from @tmp where gno = '8' and product = @product)
-			set @max = (select MAX(rec) from @tmp where gno = '8' and product = @product)
-			set @i = 0
-			set @str = ''
-			while(@i < @cnt)
-			begin
-				set @spec = (select spec2 from @tmp where gno = '8' and rec = @rec+@i and quatno = @quatno and product = @product)
-				if(RIGHt(@spec,2) = 'mm' and @rec+@i != @max)
-				begin
-					set @spec = REPLACE(@spec,'mm','')
-				end
-				if(@i = 0)
-				begin
-					set @str = @str + @spec
-					set @i = @i +1	
-				end	
-				else
-				begin	
-					set @str = @str + '-' + @spec
-					set @i = @i +1
-				end
-			end					
-			insert into @tmp(gno,rec,quatno,tggno,tgg,trandate,q_productno,q_product,spec1)
-			select '2',@no,quatno,tggno,tgg,trandate,@q_productno,@q_product+':',@str from @tmp where gno = '1' and quatno = @quatno and tggno = @tggno
-		end	
-		
-	end
-		
-	set @q_xproductno = @q_productno
-	set @xproduct = @product
-	
-	fetch next from cursor_table 
-	into @gno,@rec,@tggno,@quatno,@q_productno,@q_product,@product	
-end 
-close cursor_table 
-deallocate cursor_table  
-
-delete @tmp where gno = '7' or gno = '8'
-
-declare @xquatno nvarchar(30)
-declare @q_xproduct nvarchar(100)
-declare @min int
-declare @len int
-
-set @xquatno = 'xxxxxx'
-set @q_xproduct = 'xxxxxx'
-
-declare cursor_table cursor for 
-select rec,tggno,quatno,q_product from @tmp where gno = '2' order by tggno,rec
-open cursor_table 
-fetch next from cursor_table 
-into @rec,@tggno,@quatno,@q_product 
+into @rec,@productno,@memo
 while(@@FETCH_STATUS <> -1) 
 begin
-	if(@q_product != @q_xproduct)
-	begin
-		set @min = (select MIN(rec) from @tmp where tggno = @tggno and quatno = @quatno and q_product = @q_product)
-		set @len = LEN(@q_product)	
-	end
-	if(@min < @rec)
-	begin
-		update @tmp set q_product = REPLICATE('&nbsp',@len) where tggno = @tggno and rec = @rec and quatno = @quatno and q_product = @q_product
-	end
-	
-	set @xquatno = @quatno
-	set @q_xproduct = @q_product
 
-	fetch next from cursor_table 
-	into @rec,@tggno,@quatno,@q_product
-end 
-close cursor_table 
-deallocate cursor_table 
-
-declare @xtggno  nvarchar(20)
-set @xtggno = 'xxxxxxxxxx'
-
-declare cursor_table cursor for 
-select rec,tggno from @tmp where gno = '2' order by tggno,rec
-open cursor_table 
-fetch next from cursor_table 
-into @rec,@tggno 
-while(@@FETCH_STATUS <> -1) 
-begin
-	if(@tggno != @xtggno)
-	begin 
-		set @cnt = 0
-		set @max = (select MAX(rec) from @tmp where gno = '2' and tggno = @tggno)
-		insert into @tmp(gno,rec,tggno,tgg,quatno)
-		select '4',@max,tggno,tgg,quatno from @tmp where gno = '2' and rec = @rec and tggno = @tggno
-	end
-	set @cnt = @cnt + 1
-	
-	if(@cnt % 30 = 0 and @rec != @max)
+	set @cnt = LEN(@memo) - LEN(REPLACE(@memo,'{',''))
+	set @i =0
+	set @img = ''
+	while (@i < @cnt)
 	begin
-		insert into @tmp(gno,rec,tggno,tgg,quatno)
-		select '0',@rec+1,tggno,tgg,quatno from @tmp where gno = '2' and rec = @rec and tggno = @tggno
-		insert into @tmp(gno,rec,tggno,tgg,quatno)
-		select '1',@rec+1,tggno,tgg,quatno from @tmp where gno = '2' and rec = @rec and tggno = @tggno
-		insert into @tmp(gno,rec,tggno,tgg,quatno)
-		select '3',rec,tggno,tgg,quatno from @tmp where gno = '2' and rec = @rec and tggno = @tggno
+		set @img = @img +'<img width="140px" src="http://'+@t_ip+'/images/upload/'+@productno+'_'+dbo.split(dbo.split(@memo,'{',@i+1),'}',0)+'.JPG">'
+			set @i = @i + 1
 	end	
-	
-	set @xtggno = @tggno
-	
-	fetch next from cursor_table
-	into @rec,@tggno
-end 
-close cursor_table 
-deallocate cursor_table
+	set @memo = dbo.split(@memo,'{',0)+'<br>'+@img
+	update @tmp set memo = @memo where rec = @rec
 
-/*insert into @tmp(gno,quatno,mount)
-select '9',quatno,SUM(mount) from @tmp where gno = '2' group by quatno
-
-declare @min int
-set @xquatno = 'xxxxxxxxxxxxx'
-
-declare cursor_table cursor for 
-select rec,quatno from @tmp where gno = '2' order by quatno
-open cursor_table 
-fetch next from cursor_table 
-into @rec,@quatno 
-while(@@FETCH_STATUS <> -1) 
-begin
-
-	if(@quatno != @xquatno)
-	begin
-		set @min = (select MIN(rec) from @tmp where gno = '2' and quatno = @quatno)
-	end
-	if(@min = @rec)
-	begin
-		update @tmp set mount = (select mount from @tmp where gno = '9' and quatno = @quatno) where rec = @rec
-	end
-	else if(@min < @rec)
-	begin
-		update @tmp set mount = null where rec = @rec
-	end
-
-	set @xquatno = @quatno
 
 	fetch next from cursor_table 
-	into @rec,@quatno
+	into @rec,@productno,@memo	
 end 
 close cursor_table 
 deallocate cursor_table 
 
-delete @tmp where gno = '9'*/
+update @tmp set logo = '<img width="160px" src="http://59.125.143.171/images/logo_gu.png">'
 
-select 
-	gno,rec,c_serial,c_email,c_addr1,c_addr2,c_tel,c_fax,
-	tggno,tgg,quatno,trandate,q_productno,q_product,product,spec1,dbo.getComma(mount,-1) mount,dbo.getComma(price,-1) price 
-from @tmp order by tggno,quatno,rec,gno ;
+select * from @tmp order by tggno,quatno,gno ;
+
 
 
 --******************************************************************************
@@ -280,211 +95,182 @@ declare @t_btggno nvarchar(20)
 declare @t_etggno nvarchar(20)
 declare @t_quatno nvarchar(30)
 declare @t_contract nvarchar(30)
+declare @t_ip nvarchar(20)
 
 set @t_btggno = case when '#non'=[3] then '' else [3] end
 set @t_etggno = case when '#non'=[4] then char(255) else [4] end
 set @t_quatno = case when '#non' = [5] then '' else [5] end
 set @t_contract = case when '#non' = [6] then '' else [6] end
+set @t_ip = case when '#non' = '[7]' then '' else '[7]' end
 --------------------------------------------------------------------------------
+SET QUOTED_IDENTIFIER OFF
+
 declare @tmp table(
 	gno nvarchar(1),
 	rec int,
+	mount float,
 	quatno nvarchar(30),
-	tggno nvarchar(100),
-	tgg nvarchar(100),
-	trandate nvarchar(10),
-	q_productno nvarchar(100),
-	q_product nvarchar(max),
+	datea nvarchar(10),
+	
+	tggno nvarchar(20),
+	tgg nvarchar(50),
+	productnos nvarchar(30),
+	products nvarchar(100),
+	productno nvarchar(30),
 	product nvarchar(100),
-	spec1 nvarchar(50),
-	spec2 nvarchar(50),
-	price float
+	spec nvarchar(50),
+	price float,
+	img1 nvarchar(max),
+	img2 nvarchar(max),
+	img3 nvarchar(max),
+	img4 nvarchar(max),
+	img5 nvarchar(max),
+	img6 nvarchar(max)
 )
 
 insert into @tmp
-select '9',ROW_NUMBER() over (partition by a.quatno order by a.quatno,a.tggno),a.quatno,a.tggno,e.nick+'-',a.trandate,b.productno,REPLACE(b.product,'~#$~#$','"'),c.product,d.spec,c.spec,b.price
-from view_ordc a
-left join view_ordcs b on a.noa = b.noa
-left join ucas c on b.productno = c.noa
-left join ucc d on b.productno = d.noa
-left join tgg e on a.tggno = e.noa  
-where(a.quatno is not null) and (a.tggno between @t_btggno and @t_etggno) and
-	 (LEN(@t_quatno) = 0 or a.quatno = @t_quatno) and (LEN(@t_contract) = 0 or a.contract = @t_contract)
-order by a.quatno,a.tgg
+select '9',ROW_NUMBER() over (partition by a.noa order by a.noa,e.tggno),b.mount,a.noa,b.datea,
+	   e.tggno,f.nick,c.noa,REPLACE(c.product,'~#$~#$','"'),d.productno,dbo.split(d.product,':',0)+':'+dbo.split(dbo.split(d.product,':',1),' ',0),d.spec,e.inprice,
+	   case when dbo.split(c.images,char(59),0) != '' then '<img width="140px" src="http://'+@t_ip+'/images/upload/'+c.noa+'_'+dbo.split(c.images,char(59),0)+'">' else '' end,
+	   case when dbo.split(c.images,char(59),1) != dbo.split(c.images,char(59),0) then '<img width="140px" src="http://'+@t_ip+'/images/upload/'+c.noa+'_'+dbo.split(c.images,char(59),1)+'">' else '' end,
+	   case when dbo.split(c.images,char(59),2) != dbo.split(c.images,char(59),1) then '<img width="140px" src="http://'+@t_ip+'/images/upload/'+c.noa+'_'+dbo.split(c.images,char(59),2)+'">' else '' end,
+	   case when dbo.split(c.images,char(59),3) != dbo.split(c.images,char(59),2) then '<img width="140px" src="http://'+@t_ip+'/images/upload/'+c.noa+'_'+dbo.split(c.images,char(59),3)+'">' else '' end,
+	   case when dbo.split(c.images,char(59),4) != dbo.split(c.images,char(59),3) then '<img width="140px" src="http://'+@t_ip+'/images/upload/'+c.noa+'_'+dbo.split(c.images,char(59),4)+'">' else '' end,
+	   case when dbo.split(c.images,char(59),5) != dbo.split(c.images,char(59),4) then '<img width="140px" src="http://'+@t_ip+'/images/upload/'+c.noa+'_'+dbo.split(c.images,char(59),5)+'">' else '' end
+	  
+from view_orde a
+left join view_ordes b on a.noa = b.noa
+left join uca c on b.productno = c.noa
+left join ucas d on c.noa = d.noa
+left join ucc e on d.productno = e.noa
+left join tgg f on e.tggno = f.noa
+where(a.quatno is not null) and (c.tggno between @t_btggno and @t_etggno) and
+	 (LEN(@t_quatno) = 0 or a.noa = @t_quatno) and (LEN(@t_contract) = 0 or a.contract = @t_contract)
+order by a.noa,e.tggno
 
-insert into @tmp (gno,quatno,tggno,tgg,trandate)
-select '1',max(quatno),MAX(tggno),MAX(tgg),MAX(trandate) from @tmp group by quatno,tggno
+delete @tmp where product is null
+--update @tmp set product = dbo.split(dbo.split(product,':',1),' ',0)
 
-update @tmp set gno = case when product is not null then '7' else '8' end where gno = '9'
-update @tmp set product = dbo.split(dbo.split(product,':',1),' ',0) where gno = '7'
+insert into @tmp(gno,mount,quatno,tggno,tgg,datea,products,img1,img2,img3,img4,img5,img6)
+select DISTINCT '1',mount,quatno,tggno,tgg,datea,products,img1,img2,img3,img4,img5,img6 from @tmp
 
-update @tmp set product = q_product where gno = '8'
-update @tmp set spec2 = spec1 where gno = '8'
-
-declare @gno nvarchar(1)
 declare @rec int
-declare @tggno nvarchar(30)
 declare @quatno nvarchar(30)
 declare @xquatno nvarchar(30)
-declare @q_productno nvarchar(30)
-declare @q_product nvarchar(100)
-declare @q_xproductno nvarchar(30)  
+declare @tggno nvarchar(20)
+declare	@tgg nvarchar(50)
+declare @products nvarchar(100)
 declare @product nvarchar(100)
 declare @xproduct nvarchar(100)
 declare @spec nvarchar(50)
-declare @str nvarchar(100)
+declare @price float
+
+declare @no int
 declare @cnt int
 declare @max int
 declare @i int
-declare @no int
+declare @str nvarchar(100)
 
-set @xquatno = 'xxxxxx'
-set @q_xproductno = 'xxxxxx'
-set @xproduct = 'xxxxxx'
-set @no = 0
+set @xquatno = 'xxxxxxxxxx'
+set @xproduct = 'xxxxxxxxxx'
 
 declare cursor_table cursor for 
-select gno,rec,tggno,quatno,q_productno,q_product,product from @tmp where gno = '7' or gno = '8' order by quatno,tggno
+select rec,quatno,tggno,tgg,products,product from @tmp where gno = '9'
 open cursor_table 
 fetch next from cursor_table 
-into @gno,@rec,@tggno,@quatno,@q_productno,@q_product,@product
+into @rec,@quatno,@tggno,@tgg,@products,@product
 while(@@FETCH_STATUS <> -1) 
-begin	
+begin
 	if(@quatno != @xquatno)
 	begin
 		set @no = 0
 	end
 	if(@product != @xproduct)
-	begin 	
-		set @no = @no +1
-		if (@gno = '7')
+	begin
+	print @product
+		set @no = @no + 1
+		set @cnt = (select COUNT(*) from @tmp where gno = '9' and quatno = @quatno and product = @product and tggno = @tggno)
+		set @max = (select MAX(rec) from @tmp where gno = '9' and quatno = @quatno and product = @product and tggno = @tggno)
+		set @i = 0
+		set @spec = ''
+		set @price = 0
+		
+		while(@i < @cnt)
 		begin
-			set @cnt = (select COUNT(*) from @tmp where gno = '7' and product = @product)
-			set @max = (select MAX(rec) from @tmp where gno = '7' and product = @product)
-			set @i = 0
-			set @str = ''
-			while(@i < @cnt)
-			begin
-			set @spec = (select spec2 from @tmp where gno = '7' and rec = @rec+@i and quatno = @quatno and product = @product)
-			if(RIGHT(@spec,2) = 'mm' and @rec+@i != @max)
-			begin
-				set @spec = REPLACE(@spec,'mm','')
-			end
-				if(@i = 0)
-				begin
-					set @str = @str + @spec
-					set @i = @i +1	
-				end	
-				else
-				begin	
-					set @str = @str + '-' + @spec
-					set @i = @i +1
-				end
-			end		
+			set @price += (select price from @tmp where gno = '9' and rec = @rec+@i and quatno = @quatno and products = @products and product = @product and tggno = @tggno)
 			
-			insert into @tmp(gno,rec,quatno,tggno,tgg,trandate,q_productno,q_product,product,spec1)
-			select '0',@no,quatno,tggno,tgg,trandate,@q_productno,@q_product+':',@product+':',@str from @tmp where gno = '1' and tggno = @tggno and quatno = @quatno
-		end	
-		else if (@gno = '8')
-		begin
-			set @cnt = (select COUNT(*) from @tmp where gno = '8' and product = @product)
-			set @max = (select MAX(rec) from @tmp where gno = '8' and product = @product)
-			set @i = 0
-			set @str = ''
-			while(@i < @cnt)
+			set @str = (select spec from @tmp where gno = '9' and rec = @rec+@i and quatno = @quatno and products = @products and product = @product and tggno = @tggno)
+			if(RIGHT(@str,2) = 'mm' and @rec+@i != @max)
 			begin
-				set @spec = (select spec2 from @tmp where gno = '8' and rec = @rec+@i and quatno = @quatno and product = @product)
-				if(RIGHt(@spec,2) = 'mm' and @rec+@i != @max)
-				begin
-					set @spec = REPLACE(@spec,'mm','')
-				end
-				if(@i = 0)
-				begin
-					set @str = @str + @spec
-					set @i = @i +1	
-				end	
-				else
-				begin	
-					set @str = @str + '-' + @spec
-					set @i = @i +1
-				end
-			end		
-			insert into @tmp(gno,rec,quatno,tggno,tgg,trandate,q_productno,q_product,spec1)
-			select '0',@no,quatno,tggno,tgg,trandate,@q_productno,@q_product+':',@str from @tmp where gno = '1' and tggno = @tggno and quatno = @quatno
+				set @str = REPLACE(@str,'mm','')
+			end
+
+			if(@i = 0)
+			begin
+				set @spec = @spec + @str
+				set @i = @i +1	
+			end	
+			else
+			begin	
+				set @spec = @spec + '-' + @str
+				set @i = @i +1
+			end
 		end	
 		
+		insert into @tmp(gno,rec,mount,quatno,datea,tggno,tgg,products,product,spec,price,img1,img2,img3,img4,img5,img6)
+		select '0',@no,mount,quatno,datea,@tggno,@tgg+'-',products+':',@product+':',@spec,@price,img1,img2,img3,img4,img5,img6 from @tmp where gno = '1' and quatno = @quatno	and tggno = @tggno	
 	end
 	
-	set @xquatno = @quatno
-	set @q_xproductno = @q_productno
+	set @xquatno = @quatno	
 	set @xproduct = @product
 	
 	fetch next from cursor_table 
-	into @gno,@rec,@tggno,@quatno,@q_productno,@q_product,@product	
+	into @rec,@quatno,@tggno,@tgg,@products,@product	
 end 
 close cursor_table 
-deallocate cursor_table 
-
-delete @tmp where gno = '1' or gno = '7' or gno = '8'
-
---
-declare @q_xproduct nvarchar(100)
-declare @min int
-declare @len int
-
-set @xquatno = 'xxxxxx'
-set @q_xproduct = 'xxxxxx'
-
-declare cursor_table cursor for 
-select rec,quatno,q_product from @tmp order by quatno,tggno
-open cursor_table 
-fetch next from cursor_table 
-into @rec,@quatno,@q_product 
-while(@@FETCH_STATUS <> -1) 
-begin
-	if(@q_product != @q_xproduct)
-	begin
-		set @min = (select MIN(rec) from @tmp where quatno = @quatno and q_product = @q_product)
-		set @len = LEN(@q_product)	
-	end
-	if(@min < @rec)
-	begin
-		update @tmp set q_product = REPLICATE('&nbsp',@len) where rec = @rec and quatno = @quatno and q_product = @q_product
-	end
-	
-	set @xquatno = @quatno
-	set @q_xproduct = @q_product
-
-	fetch next from cursor_table 
-	into @rec,@quatno,@q_product
-end 
-close cursor_table 
-deallocate cursor_table 
+deallocate cursor_table 	 
+	 
+delete @tmp where gno = '9'	or gno = '1' 
 
 
 declare @xtggno nvarchar(30)
-set @xtggno = 'xxxxxx'
+declare @tmin int
+declare @pmin int
+
+set @xproduct = 'xxxxxxxxxx'
+set @xtggno = 'xxxxxxxxxx'
 
 declare cursor_table cursor for 
-select rec,quatno,tggno from @tmp order by quatno,tggno
+select rec,quatno,tggno,product from @tmp
 open cursor_table 
 fetch next from cursor_table 
-into @rec,@quatno,@tggno
+into @rec,@quatno,@tggno,@product
 while(@@FETCH_STATUS <> -1) 
 begin
 	if(@tggno != @xtggno)
 	begin
-		set @min = (select MIN(rec) from @tmp where quatno = @quatno and tggno = @tggno)
+		set @tmin = (select MIN(rec) from @tmp where quatno = @quatno and tggno = @tggno)
+		set @pmin = @rec
+		set @xproduct = dbo.split(@product,':',0)	
 	end
-	if(@min < @rec)
+	if(@tmin < @rec)
 	begin
 		update @tmp set tgg = '' where rec = @rec and quatno = @quatno and tggno = @tggno
 	end
+
+	if(dbo.split(@product,':',0) = @xproduct and @pmin < @rec)
+	begin
 	
-	set @xtggno = @tggno	
+		update @tmp set product = REPLACE(product,@xproduct+':','&nbsp&nbsp') where rec = @rec and quatno = @quatno and product = @product
+	end
+	else
+	begin
+		set @xproduct = dbo.split(@product,':',0)
+	end
+	set @xtggno = @tggno
 
 	fetch next from cursor_table 
-	into @rec,@quatno,@tggno
+	into @rec,@quatno,@tggno,@product
 end 
 close cursor_table 
 deallocate cursor_table
@@ -495,7 +281,7 @@ deallocate cursor_table
 set @xquatno = 'xxxxxxxxxx'
 
 declare cursor_table cursor for 
-select rec,quatno from @tmp where gno = '0' order by quatno
+select rec,quatno from @tmp where gno = '0'
 open cursor_table 
 fetch next from cursor_table 
 into @rec,@quatno 
@@ -514,8 +300,8 @@ begin
 	end	
 	if(@rec = @max)
 	begin
-		insert into @tmp(gno,rec,quatno,trandate)
-		select '2',rec,quatno,CONVERT(varchar(10),GETDATE(),111) from @tmp where rec = @rec and quatno = @quatno
+		insert into @tmp(gno,rec,quatno,datea,img1,img2,img3,img4,img5,img6)
+		select '2',rec,quatno,CONVERT(varchar(10),GETDATE(),111),img1,img2,img3,img4,img5,img6 from @tmp where rec = @rec and quatno = @quatno
 	end
 	set @xquatno = @quatno
 	
@@ -525,7 +311,11 @@ end
 close cursor_table 
 deallocate cursor_table
 
-select gno,rec,quatno,tgg,trandate,q_product,product,spec1,dbo.getComma(price,-1) price from @tmp order by quatno,rec,gno ;
+
+select *,dbo.getComma(price,2) prc from @tmp order by quatno,rec,gno  ;
+
+	 
+
 
 
 
@@ -536,190 +326,194 @@ declare @t_btggno nvarchar(20)
 declare @t_etggno nvarchar(20)
 declare @t_quatno nvarchar(30)
 declare @t_contract nvarchar(30)
+declare @t_ip nvarchar(20)
+
 
 set @t_btggno = case when '#non'=[3] then '' else [3] end
 set @t_etggno = case when '#non'=[4] then char(255) else [4] end
 set @t_quatno = case when '#non' = [5] then '' else [5] end
 set @t_contract = case when '#non' = [6] then '' else [6] end
+set @t_ip = case when '#non' = '[7]' then '' else '[7]' end
 --------------------------------------------------------------------------------
+SET QUOTED_IDENTIFIER OFF
+
 declare @tmp table(
 	gno nvarchar(1),
 	rec int,
+	mount float,
 	quatno nvarchar(30),
-	tggno nvarchar(100),
-	tgg nvarchar(100),
-	trandate nvarchar(10),
-	q_productno nvarchar(100),
-	q_product nvarchar(max),
+	datea nvarchar(10),
+	
+	tggno nvarchar(20),
+	tgg nvarchar(50),
+	productnos nvarchar(30),
+	products nvarchar(100),
+	productno nvarchar(30),
 	product nvarchar(100),
-	spec1 nvarchar(50),
-	spec2 nvarchar(50),
-	price float
+	spec nvarchar(50),
+	price float,
+	img1 nvarchar(max),
+	img2 nvarchar(max),
+	img3 nvarchar(max),
+	img4 nvarchar(max),
+	img5 nvarchar(max),
+	img6 nvarchar(max)
 )
 
 insert into @tmp
-select '9',ROW_NUMBER() over (partition by a.quatno order by a.quatno,a.tggno),a.quatno,a.tggno,e.nick+'-',a.trandate,b.productno,REPLACE(b.product,'~#$~#$','"'),c.product,d.spec,c.spec,b.price
-from view_ordc a
-left join view_ordcs b on a.noa = b.noa
-left join ucas c on b.productno = c.noa
-left join ucc d on b.productno = d.noa
-left join tgg e on a.tggno = e.noa  
-where(a.quatno is not null) and (a.tggno between @t_btggno and @t_etggno) and
-	 (LEN(@t_quatno) = 0 or a.quatno = @t_quatno) and (LEN(@t_contract) = 0 or a.contract = @t_contract)
-order by a.quatno,a.tgg
+select '9',ROW_NUMBER() over (partition by a.noa order by a.noa,e.tggno),b.mount,a.noa,b.datea,
+	   e.tggno,f.nick,c.noa,REPLACE(c.product,'~#$~#$','"'),d.productno,dbo.split(d.product,':',0)+':'+dbo.split(dbo.split(d.product,':',1),' ',0),d.spec,e.inprice,
+	   case when dbo.split(c.images,char(59),0) != '' then '<img width="140px" src="http://'+@t_ip+'/images/upload/'+c.noa+'_'+dbo.split(c.images,char(59),0)+'">' else '' end,
+	   case when dbo.split(c.images,char(59),1) != dbo.split(c.images,char(59),0) then '<img width="140px" src="http://'+@t_ip+'/images/upload/'+c.noa+'_'+dbo.split(c.images,char(59),1)+'">' else '' end,
+	   case when dbo.split(c.images,char(59),2) != dbo.split(c.images,char(59),1) then '<img width="140px" src="http://'+@t_ip+'/images/upload/'+c.noa+'_'+dbo.split(c.images,char(59),2)+'">' else '' end,
+	   case when dbo.split(c.images,char(59),3) != dbo.split(c.images,char(59),2) then '<img width="140px" src="http://'+@t_ip+'/images/upload/'+c.noa+'_'+dbo.split(c.images,char(59),3)+'">' else '' end,
+	   case when dbo.split(c.images,char(59),4) != dbo.split(c.images,char(59),3) then '<img width="140px" src="http://'+@t_ip+'/images/upload/'+c.noa+'_'+dbo.split(c.images,char(59),4)+'">' else '' end,
+	   case when dbo.split(c.images,char(59),5) != dbo.split(c.images,char(59),4) then '<img width="140px" src="http://'+@t_ip+'/images/upload/'+c.noa+'_'+dbo.split(c.images,char(59),5)+'">' else '' end
+	  
+from view_orde a
+left join view_ordes b on a.noa = b.noa
+left join uca c on b.productno = c.noa
+left join ucas d on c.noa = d.noa
+left join ucc e on d.productno = e.noa
+left join tgg f on e.tggno = f.noa
+where(a.quatno is not null) and (c.tggno between @t_btggno and @t_etggno) and
+	 (LEN(@t_quatno) = 0 or a.noa = @t_quatno) and (LEN(@t_contract) = 0 or a.contract = @t_contract)
+order by a.noa,e.tggno
 
-insert into @tmp (gno,quatno,tggno,tgg,trandate)
-select '1',max(quatno),MAX(tggno),MAX(tgg),MAX(trandate) from @tmp group by quatno,tggno
+delete @tmp where product is null
+--update @tmp set product = dbo.split(dbo.split(product,':',1),' ',0)
 
-update @tmp set gno = case when product is not null then '7' else '8' end where gno = '9'
-update @tmp set product = dbo.split(dbo.split(product,':',1),' ',0) where gno = '7'
+insert into @tmp(gno,mount,quatno,tggno,tgg,datea,products,img1,img2,img3,img4,img5,img6)
+select DISTINCT '1',mount,quatno,tggno,tgg,datea,products,img1,img2,img3,img4,img5,img6 from @tmp
 
-update @tmp set product = q_product where gno = '8'
-update @tmp set spec2 = spec1 where gno = '8'
-
-declare @gno nvarchar(1)
 declare @rec int
-declare @tggno nvarchar(30)
 declare @quatno nvarchar(30)
 declare @xquatno nvarchar(30)
-declare @q_productno nvarchar(30)
-declare @q_product nvarchar(100)
-declare @q_xproductno nvarchar(30)  
+declare @tggno nvarchar(20)
+declare	@tgg nvarchar(50)
+declare @products nvarchar(100)
 declare @product nvarchar(100)
 declare @xproduct nvarchar(100)
 declare @spec nvarchar(50)
-declare @str nvarchar(100)
+declare @price float
+
+declare @no int
 declare @cnt int
 declare @max int
 declare @i int
-declare @no int
+declare @str nvarchar(100)
 
-set @xquatno = 'xxxxxx'
-set @q_xproductno = 'xxxxxx'
-set @xproduct = 'xxxxxx'
-set @no = 0
+set @xquatno = 'xxxxxxxxxx'
+set @xproduct = 'xxxxxxxxxx'
 
 declare cursor_table cursor for 
-select gno,rec,tggno,quatno,q_productno,q_product,product from @tmp where gno = '7' or gno = '8' order by quatno,tggno
+select rec,quatno,tggno,tgg,products,product from @tmp where gno = '9'
 open cursor_table 
 fetch next from cursor_table 
-into @gno,@rec,@tggno,@quatno,@q_productno,@q_product,@product
+into @rec,@quatno,@tggno,@tgg,@products,@product
 while(@@FETCH_STATUS <> -1) 
-begin	
+begin
 	if(@quatno != @xquatno)
 	begin
 		set @no = 0
 	end
 	if(@product != @xproduct)
-	begin 	
-		set @no = @no +1
-		if (@gno = '7')
+	begin
+	print @product
+		set @no = @no + 1
+		set @cnt = (select COUNT(*) from @tmp where gno = '9' and quatno = @quatno and product = @product and tggno = @tggno)
+		set @max = (select MAX(rec) from @tmp where gno = '9' and quatno = @quatno and product = @product and tggno = @tggno)
+		set @i = 0
+		set @spec = ''
+		set @price = 0
+		
+		while(@i < @cnt)
 		begin
-			set @cnt = (select COUNT(*) from @tmp where gno = '7' and product = @product)
-			set @max = (select MAX(rec) from @tmp where gno = '7' and product = @product)
-			set @i = 0
-			set @str = ''
-			while(@i < @cnt)
-			begin
-			set @spec = (select spec2 from @tmp where gno = '7' and rec = @rec+@i and quatno = @quatno and product = @product)
-			if(RIGHT(@spec,2) = 'mm' and @rec+@i != @max)
-			begin
-				set @spec = REPLACE(@spec,'mm','')
-			end
-				if(@i = 0)
-				begin
-					set @str = @str + @spec
-					set @i = @i +1	
-				end	
-				else
-				begin	
-					set @str = @str + '-' + @spec
-					set @i = @i +1
-				end
-			end		
+			set @price += (select price from @tmp where gno = '9' and rec = @rec+@i and quatno = @quatno and products = @products and product = @product and tggno = @tggno)
 			
-			insert into @tmp(gno,rec,quatno,tggno,tgg,trandate,q_productno,q_product,product,spec1)
-			select '2',@no,quatno,tggno,tgg,trandate,@q_productno,@q_product+':',@product+':',@str from @tmp where gno = '1' and tggno = @tggno and quatno = @quatno
-		end	
-		else if (@gno = '8')
-		begin
-			set @cnt = (select COUNT(*) from @tmp where gno = '8' and product = @product)
-			set @max = (select MAX(rec) from @tmp where gno = '8' and product = @product)
-			set @i = 0
-			set @str = ''
-			while(@i < @cnt)
+			set @str = (select spec from @tmp where gno = '9' and rec = @rec+@i and quatno = @quatno and products = @products and product = @product and tggno = @tggno)
+			if(RIGHT(@str,2) = 'mm' and @rec+@i != @max)
 			begin
-				set @spec = (select spec2 from @tmp where gno = '8' and rec = @rec+@i and quatno = @quatno and product = @product)
-				if(RIGHt(@spec,2) = 'mm' and @rec+@i != @max)
-				begin
-					set @spec = REPLACE(@spec,'mm','')
-				end
-				if(@i = 0)
-				begin
-					set @str = @str + @spec
-					set @i = @i +1	
-				end	
-				else
-				begin	
-					set @str = @str + '-' + @spec
-					set @i = @i +1
-				end
-			end		
-			insert into @tmp(gno,rec,quatno,tggno,tgg,trandate,q_productno,q_product,spec1)
-			select '2',@no,quatno,tggno,tgg,trandate,@q_productno,@q_product+':',@str from @tmp where gno = '1' and tggno = @tggno and quatno = @quatno
+				set @str = REPLACE(@str,'mm','')
+			end
+
+			if(@i = 0)
+			begin
+				set @spec = @spec + @str
+				set @i = @i +1	
+			end	
+			else
+			begin	
+				set @spec = @spec + '-' + @str
+				set @i = @i +1
+			end
 		end	
 		
+		insert into @tmp(gno,rec,mount,quatno,datea,tggno,tgg,products,product,spec,price,img1,img2,img3,img4,img5,img6)
+		select '2',@no,mount,quatno,datea,@tggno,@tgg+'-',products+':',@product+':',@spec,@price,img1,img2,img3,img4,img5,img6 from @tmp where gno = '1' and quatno = @quatno	and tggno = @tggno	
 	end
 	
-	set @xquatno = @quatno
-	set @q_xproductno = @q_productno
+	set @xquatno = @quatno	
 	set @xproduct = @product
 	
 	fetch next from cursor_table 
-	into @gno,@rec,@tggno,@quatno,@q_productno,@q_product,@product	
+	into @rec,@quatno,@tggno,@tgg,@products,@product	
 end 
 close cursor_table 
-deallocate cursor_table 
+deallocate cursor_table 	 
+	 
+delete @tmp where gno = '9'	or gno = '1' 
 
-delete @tmp where gno = '1' or gno = '7' or gno = '8'
 
---
-declare @q_xproduct nvarchar(100)
-declare @min int
-declare @len int
+declare @xtggno nvarchar(30)
+declare @tmin int
+declare @pmin int
 
-set @xquatno = 'xxxxxx'
-set @q_xproduct = 'xxxxxx'
+set @xproduct = 'xxxxxxxxxx'
+set @xtggno = 'xxxxxxxxxx'
 
 declare cursor_table cursor for 
-select rec,quatno,q_product from @tmp order by quatno,tggno
+select rec,quatno,tggno,product from @tmp
 open cursor_table 
 fetch next from cursor_table 
-into @rec,@quatno,@q_product 
+into @rec,@quatno,@tggno,@product
 while(@@FETCH_STATUS <> -1) 
 begin
-	if(@q_product != @q_xproduct)
+	if(@tggno != @xtggno)
 	begin
-		set @min = (select MIN(rec) from @tmp where quatno = @quatno and q_product = @q_product)
-		set @len = LEN(@q_product)	
+		set @tmin = (select MIN(rec) from @tmp where quatno = @quatno and tggno = @tggno)
+		set @pmin = @rec
+		set @xproduct = dbo.split(@product,':',0)	
 	end
-	if(@min < @rec)
+	if(@tmin < @rec)
 	begin
-		update @tmp set q_product = REPLICATE('&nbsp',@len) where rec = @rec and quatno = @quatno and q_product = @q_product
+		update @tmp set tgg = '' where rec = @rec and quatno = @quatno and tggno = @tggno
 	end
+
+	if(dbo.split(@product,':',0) = @xproduct and @pmin < @rec)
+	begin
 	
-	set @xquatno = @quatno
-	set @q_xproduct = @q_product
+		update @tmp set product = REPLACE(product,@xproduct+':','&nbsp&nbsp') where rec = @rec and quatno = @quatno and product = @product
+	end
+	else
+	begin
+		set @xproduct = dbo.split(@product,':',0)
+	end
+	set @xtggno = @tggno
 
 	fetch next from cursor_table 
-	into @rec,@quatno,@q_product
+	into @rec,@quatno,@tggno,@product
 end 
 close cursor_table 
-deallocate cursor_table 
+deallocate cursor_table
 
+ 
+ 
+--控制換頁
+set @xquatno = 'xxxxxxxxxx'
 
 declare cursor_table cursor for 
-select rec,quatno from @tmp where gno = '2' order by quatno,rec
+select rec,quatno from @tmp where gno = '2'
 open cursor_table 
 fetch next from cursor_table 
 into @rec,@quatno 
@@ -738,8 +532,8 @@ begin
 	end	
 	if(@rec = @max)
 	begin
-		insert into @tmp(gno,rec,quatno)
-		select '4',rec,quatno from @tmp where rec = @rec and quatno = @quatno
+		insert into @tmp(gno,rec,quatno,datea,img1,img2,img3,img4,img5,img6)
+		select '4',rec,quatno,CONVERT(varchar(10),GETDATE(),111),img1,img2,img3,img4,img5,img6 from @tmp where rec = @rec and quatno = @quatno
 	end
 	set @xquatno = @quatno
 	
@@ -749,11 +543,10 @@ end
 close cursor_table 
 deallocate cursor_table
 
-declare @xtggno nvarchar(30)
-set @xtggno = 'xxxxxx'
+declare @min int
 
 declare cursor_table cursor for 
-select rec,quatno,tggno from @tmp order by quatno,tggno
+select rec,quatno,tggno from @tmp where gno = '2' order by quatno,tggno
 open cursor_table 
 fetch next from cursor_table 
 into @rec,@quatno,@tggno
@@ -777,4 +570,4 @@ end
 close cursor_table 
 deallocate cursor_table
 
-select gno,rec,quatno,tgg,trandate,q_product,product,spec1,dbo.getComma(price,-1) price from @tmp order by quatno,rec,gno ;
+select *,dbo.getComma(price,2) prc from @tmp order by quatno,rec,gno  ;
