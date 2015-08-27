@@ -131,7 +131,9 @@ declare @gweight float
 declare @cuft float
 
 declare @str nvarchar(100)
-declare @cnt int
+declare @no int
+declare @ccnt int
+declare @ncnt int
 declare @i int
 
 set @xordeno = 'xxxxxxxxxx'
@@ -146,50 +148,53 @@ while(@@FETCH_STATUS <> -1)
 begin
 	if(@ordeno != @xordeno)
 	begin
+		set @no = 0
+		
 		insert into @tmp(gno,comp,contract,ordeno,customs,caseno)
 		select DISTINCT '8',comp,contract,@ordeno,customs,caseno from @tmp where ordeno = @ordeno
 	end
 	if(@productno != @xproductno)
 	begin	
-		set @cnt = (select COUNT(*) from @tmp where gno = '9' and ordeno = @ordeno and productno = @productno)
 			
-		set @no2 = (select no2 from @tmp where rec = @rec and ordeno = @ordeno and productno = @productno)
-		set @mount = (select mount from @tmp where rec = @rec and ordeno = @ordeno and productno = @productno)
-		set @unit = (select unit from @tmp where rec = @rec and ordeno = @ordeno and productno = @productno)
-		set @mnt = @cnt
-		set @weight = (select weight from @tmp where rec = @rec and ordeno = @ordeno and productno = @productno)
-		set @gweight = (select gweight from @tmp where rec = @rec and ordeno = @ordeno and productno = @productno)
-		set @cuft = (select cuft from @tmp where rec = @rec and ordeno = @ordeno and productno = @productno)
+		set @ncnt = (select COUNT(*) from @tmp where gno = '9' and ordeno = @ordeno and productno = @productno)
+			
+		set @no2 = (select no2 from @tmp where gno = '9' and rec = @rec and ordeno = @ordeno and productno = @productno)
+		set @mount = (select mount from @tmp where gno = '9' and rec = @rec and ordeno = @ordeno and productno = @productno)
+		set @unit = (select unit from @tmp where gno = '9' and rec = @rec and ordeno = @ordeno and productno = @productno)
+		set @mnt = @ncnt
+		set @weight = (select weight from @tmp where gno = '9' and rec = @rec and ordeno = @ordeno and productno = @productno)
+		set @gweight = (select gweight from @tmp where gno = '9' and rec = @rec and ordeno = @ordeno and productno = @productno)
+		set @cuft = (select cuft from @tmp where gno = '9' and rec = @rec and ordeno = @ordeno and productno = @productno)
 		
-		insert into @tmp(gno,comp,contract,ordeno,customs,caseno,productno,product,no2,mount,unit,mnt,weight,gweight,cuft)
-		select '1',comp,contract,@ordeno,customs,caseno,@productno,@product,@no2,@mount,@unit,@mnt,@weight,@gweight,@cuft from @tmp where gno = '8' 
-		
-		if(@cnt > 1)
+		set @no = @no + 1
+		insert into @tmp(gno,rec,comp,contract,ordeno,customs,caseno,productno,product,no2,mount,unit,mnt,weight,gweight,cuft)
+		select '1',@no,comp,contract,@ordeno,customs,caseno,@productno,@product,@no2,@mount,@unit,@mnt,@weight,@gweight,@cuft from @tmp where gno = '8' 
+			
+		set @ccnt = (select COUNT(*) from @tmp where gno = '9' and ordeno = @ordeno and no2 = @no2)	
+				
+		set @i = 0
+		set @no2 = ''
+		while(@i < @ncnt)
 		begin
-			set @i = 0
-			set @no2 = ''
-			while(@i < @cnt)
-			begin
-				if(@i = 0)
-					set @no2 = @no2 + (select no2 from @tmp where rec = @rec+@i and ordeno = @ordeno and productno = @productno)
-				else
-					set @no2 = @no2 + '-' + (select no2 from @tmp where rec = @rec+@i and ordeno = @ordeno and productno = @productno)		
-				set @i = @i + 1
-			end		
-			set @mount = (select mount from @tmp where rec = @rec and ordeno = @ordeno and productno = @productno)*@cnt
-			set @unit = (select unit from @tmp where rec = @rec and ordeno = @ordeno and productno = @productno)
-			set @weight = (select weight from @tmp where rec = @rec and ordeno = @ordeno and productno = @productno)*@cnt
-			set @gweight = (select gweight from @tmp where rec = @rec and ordeno = @ordeno and productno = @productno)*@cnt
-			set @cuft = (select cuft from @tmp where rec = @rec and ordeno = @ordeno and productno = @productno)*@cnt
+			if(@i = 0)
+				set @no2 = @no2 + (select no2 from @tmp where gno = '9' and rec = @rec+@i and ordeno = @ordeno and productno = @productno)
+			else
+				set @no2 = @no2 + '-' + (select no2 from @tmp where gno = '9' and rec = @rec+@i and ordeno = @ordeno and productno = @productno)		
+			set @i = @i + 1
+		end		
+		set @mount = (select mount from @tmp where gno = '9' and rec = @rec and ordeno = @ordeno and productno = @productno)*@ncnt
+		set @unit = (select unit from @tmp where gno = '9' and rec = @rec and ordeno = @ordeno and productno = @productno)
+		set @weight = (select weight from @tmp where gno = '9' and rec = @rec and ordeno = @ordeno and productno = @productno)*@ncnt
+		set @gweight = (select gweight from @tmp where gno = '9' and rec = @rec and ordeno = @ordeno and productno = @productno)*@ncnt
+		set @cuft = (select cuft from @tmp where gno = '9' and rec = @rec and ordeno = @ordeno and productno = @productno)*@ncnt
+		
+		update @tmp set no2 = @no2,mount = @mount where gno = '1' and ordeno = @ordeno and no2 = dbo.split(@no2,'-',0)	
 			
-			update @tmp set mount = @mount where gno = '1' and ordeno = @ordeno and no2 = dbo.split(@no2,'-',0)
-			
-			insert into @tmp(gno,comp,contract,ordeno,customs,caseno,productno,product,no2,mount,unit,weight,gweight,cuft)
-			select '2',comp,contract,@ordeno,customs,caseno,@productno,@product,@no2,@mount,@unit,@weight,@gweight,@cuft from @tmp where gno = '8' 
-		end
+		set @no = @no + 1	
+		insert into @tmp(gno,rec,comp,contract,ordeno,customs,caseno,productno,product,no2,mount,unit,weight,gweight,cuft)
+		select '2',@no,comp,contract,@ordeno,customs,caseno,@productno,@product,@no2,@mount,@unit,@weight,@gweight,@cuft from @tmp where gno = '8' 
+	
 	end
-	
-	
 	
 	set @xordeno = @ordeno	
 	set @xproductno = @productno
@@ -202,11 +207,46 @@ deallocate cursor_table
 
 delete @tmp where gno = '9' or gno = '8'
 
+declare @xno2 nvarchar(30)
+declare @min int 
+
+set @xno2 = 'xxxxxxxxxx'
+
+declare cursor_table cursor for 
+select rec,ordeno,no2 from @tmp
+open cursor_table 
+fetch next from cursor_table 
+into @rec,@ordeno,@no2
+while(@@FETCH_STATUS <> -1) 
+begin
+	
+	if(@no2 != @xno2)
+	begin
+		set @min = (select MIN(rec) from @tmp where ordeno = @ordeno and no2 =@no2)
+		set @ccnt = (select COUNT(*) from @tmp where gno = '1' and ordeno = @ordeno and no2 =@no2)
+	end
+	if(@ccnt > 1 and @rec > @min )
+	begin
+		update @tmp set mnt = null,weight=null,gweight=null,cuft=null where rec = @rec and ordeno = @ordeno and no2 =@no2
+	end
+	
+	set @xno2 = @no2
+	
+	fetch next from cursor_table 
+	into @rec,@ordeno,@no2
+end 
+close cursor_table 
+deallocate cursor_table 
+
+
 insert into @tmp(gno,ordeno,mount,weight,gweight,cuft)
 select '3',ordeno,SUM(mount),SUM(weight),SUM(gweight),SUM(cuft)
 from @tmp where gno = '1' group by ordeno
 
+update @tmp set no2 = (select MAX(no2) from @tmp where gno = '1') where gno = '3'
+update @tmp set productno = (select MAX(productno) from @tmp where gno = '1') where gno = '3'
+
 select 
-	gno,comp,contract,ordeno,customs,caseno,no2,productno,product,
+	gno,rec,comp,contract,ordeno,customs,caseno,no2,productno,product,
 	dbo.getComma(mount,2)mount,unit,mnt,dbo.getComma(weight,2) weight,dbo.getComma(gweight,2) gweight,dbo.getComma(cuft,2) cuft 
-from @tmp order by ordeno,dbo.split(no2,'-',0) ;
+from @tmp order by ordeno,dbo.split(no2,'-',0),productno,gno ;
