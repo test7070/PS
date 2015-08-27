@@ -38,7 +38,7 @@
 				['txtProductno_', 'btnProduct_', 'ucaucc2', 'noa,product,unit,spec', 'txtProductno_,txtProduct_,txtUnit_,txtSpec_', 'ucaucc2_b.aspx'],
 				['txtSalesno', 'lblSales', 'sss', 'noa,namea', 'txtSalesno,txtSales', 'sss_b.aspx'],
 				['txtCno', 'lblAcomp', 'acomp', 'noa,acomp', 'txtCno,txtAcomp', 'acomp_b.aspx'],
-				['txtCustno', 'lblCust', 'cust', 'noa,nick,paytype,trantype,tel,fax,zip_comp,addr_fact', 'txtCustno,txtComp,txtPaytype,cmbTrantype,txtTel,txtFax,txtPost,txtAddr', 'cust_b.aspx'],
+				['txtCustno', 'lblCust', 'cust', 'noa,comp,nick,paytype,trantype,tel,fax,zip_comp,addr_fact', 'txtCustno,txtComp,txtNick,txtPaytype,cmbTrantype,txtTel,txtFax,txtPost,txtAddr', 'cust_b.aspx'],
 				['ordb_txtTggno_', '', 'tgg', 'noa,comp', 'ordb_txtTggno_,ordb_txtTgg_', '']
 			);
 			
@@ -1075,7 +1075,10 @@
 					<tr>
 						<td><span> </span><a id="lblCust" class="lbl btn"> </a></td>
 						<td><input id="txtCustno" type="text" class="txt c1"/></td>
-						<td colspan="2"><input id="txtComp" type="text" class="txt c1"/></td>
+						<td colspan="2">
+							<input id="txtComp" type="text" class="txt c1"/>
+							<input id="txtNick" type="hidden" class="txt c1"/>
+						</td>
 						<td><span> </span><a id='lblPaytype' class="lbl"> </a></td>
 						<td><input id="txtPaytype" type="text" class="txt c1"/></td>
 						<td><select id="combPaytype" class="txt c1" onchange='combPaytype_chg()' > </select></td>

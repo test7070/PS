@@ -34,7 +34,7 @@
 			brwKey = 'datea';
 
 			aPop = new Array(
-				['txtCustno', 'lblCust', 'cust', 'noa,nick,tel,fax,zip_comp,addr_comp,paytype,trantype,salesno,sales', 'txtCustno,txtComp,txtTel,txtFax,txtPost,txtAddr,txtPaytype,cmbTrantype,txtSalesno,txtSales', 'cust_b.aspx'],
+				['txtCustno', 'lblCust', 'cust', 'noa,comp,nick,tel,fax,zip_comp,addr_comp,paytype,trantype,salesno,sales', 'txtCustno,txtComp,txtNick,txtTel,txtFax,txtPost,txtAddr,txtPaytype,cmbTrantype,txtSalesno,txtSales', 'cust_b.aspx'],
 				['txtStoreno_', 'btnStoreno_', 'store', 'noa,store', 'txtStoreno_,txtStore_', 'store_b.aspx'],
 				['txtRackno_', 'btnRackno_', 'rack', 'noa,rack,storeno,store', 'txtRackno_', 'rack_b.aspx'],
 				['txtCardealno', 'lblCardeal', 'cardeal', 'noa,comp', 'txtCardealno,txtCardeal', 'cardeal_b.aspx'],
@@ -1335,7 +1335,10 @@
 					<tr>
 						<td><span> </span><a id="lblCust" class="lbl btn"> </a></td>
 						<td><input id="txtCustno" type="text" class="txt c1"/></td>
-						<td><input id="txtComp" type="text" class="txt c1"/></td>
+						<td>
+							<input id="txtComp" type="text" class="txt c1"/>
+							<input id="txtNick" type="hidden" class="txt c1"/>
+						</td>
 						<td><span> </span><a id='lblPay' class="lbl"> </a></td>
 						<td><input id="txtPaytype" type="text" class="txt c1"/></td>
 						<td><select id="combPay" style="width: 100%;" onchange='combPay_chg()'> </select></td>

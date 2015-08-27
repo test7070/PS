@@ -54,7 +54,8 @@
         }  
 
         function mainPost() { 
-            bbmMask = [['txtDatea', r_picd],['txtEta', r_picd],['txtEtd', r_picd],['txtOnboarddate', r_picd],['txtShippingdate', r_picd],['txtCldate', r_picd],['txtSaildate', r_picd]];
+            bbmMask = [['txtDatea', r_picd],['txtEta', r_picd],['txtEtd', r_picd],['txtOnboarddate', r_picd],['txtShippingdate', r_picd]
+            ,['txtCldate', r_picd+'-99:99'],['txtSaildate', r_picd]];
         	q_mask(bbmMask);
         	
         	if(window.parent.q_name=='vcc'){
