@@ -108,7 +108,6 @@
 				$('#lblProduct_s').text('品名');
 				$('#lblMount_s').text('數量');
 				$('#lblUnit_s').text('單位');
-				$('#lblLengthb_s').text('件數');
 				$('#lblNweight_s').text('淨重');
 				$('#lblGweight_s').text('毛重');
 				$('#lblCuft_s').text('才數');
@@ -231,7 +230,6 @@
 					<td align="center" style="width:120px;"><a id='lblHeight_s'> </a></td>-->
 					<td align="center" style="width:120px;"><a id='lblMount_s'> </a></td>
 					<td align="center" style="width:50px;"><a id='lblUnit_s'> </a></td>
-					<td align="center" style="width:120px;"><a id='lblLengthb_s'> </a></td>
 					<td align="center" style="width:120px;"><a id='lblNweight_s'> </a></td>
 					<td align="center" style="width:120px;"><a id='lblGweight_s'> </a></td>
 					<!--<td align="center" style="width:120px;"><a id='lblPrice_s'> </a></td>-->
@@ -267,7 +265,6 @@
 					<td><input class="txt num" id="txtHeight.*" type="text" /></td>-->
 					<td><input class="txt num c1" id="txtMount.*" type="text" /></td>
 					<td><input class="txt c1" id="txtUnit.*" type="text" /></td>
-					<td><input class="txt num c1" id="txtLengthb.*" type="text" /></td>
 					<td><input class="txt num c1" id="txtWeight.*" type="text" /></td>
 					<td><input class="txt num c1" id="txtGweight.*" type="text" /></td>
 					<!--<td><input class="txt num" id="txtPrice.*" type="text" /></td>-->
