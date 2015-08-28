@@ -48,7 +48,7 @@ declare @img nvarchar(max)
 set @q_xproductno = 'xxxxxx'
 set @xproduct = 'xxxxxx'
 
- --製成品原料合併
+ --製成品原料合併&圖片顯示
 declare cursor_table cursor for 
 select rec,q_productno,product,memo from @tmp where gno = '8' 
 open cursor_table 
@@ -78,6 +78,7 @@ begin
 			select '3',q_productno,q_product,@memo,@img,total from @tmp where gno = '8' and rec = @rec
 		end
 	end
+	 --製成品原料合併spec
 	if(@product != @xproduct)
 	begin 			
 		set @cnt = (select COUNT(*) from @tmp where gno = '8' and q_productno = @q_productno and product = @product)
@@ -122,6 +123,7 @@ declare @q_xproduct nvarchar(100)
 
 set @q_xproduct = 'xxxxxx'
 
+--原料圖片顯示 原料第一行顯示品名 之後只要顯示spec 
 declare cursor_table cursor for 
 select rec,q_productno,q_product,memo from @tmp where gno = '5' 
 open cursor_table 
@@ -129,6 +131,7 @@ fetch next from cursor_table
 into @rec,@q_productno,@q_product,@memo
 while(@@FETCH_STATUS <> -1) 
 begin
+	--取出要顯示的圖片{}
 	if(@q_product != @q_xproduct)
 	begin 
 		set @cnt = LEN(@memo) - LEN(REPLACE(@memo,'{',''))
