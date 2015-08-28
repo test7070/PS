@@ -48,7 +48,19 @@
                         type : '0',
                         name : 'http',
                         value:location.host
-                    }]
+                    },{
+						type : '0',//[8]
+						name : 'mountprecision',
+						value : q_getPara('vcc.mountPrecision')
+					},{
+						type : '0',//[9]
+						name : 'weightprecision',
+						value : q_getPara('vcc.weightPrecision')
+					},{
+						type : '0',//[10]
+						name : 'priceprecision',
+						value : q_getPara('vcc.pricePrecision')
+					}]
                 });
                 q_popAssign();
                 
