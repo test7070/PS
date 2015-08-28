@@ -27,7 +27,11 @@
 						type : '0',
 						name : 'accy',
                         value : q_getId()[4] 
-                    },{/*1-2 [2]*/
+                    },{/*[2]*/
+                        type : '0',
+                        name : 'xhttp',
+                        value:location.host
+                    },{/*1-2 [3]*/
                         type : '6',
                         name : 'xnoa'
                     }]

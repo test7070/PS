@@ -1,10 +1,10 @@
 ﻿z_ordcp_gu01:--z_ordcp_gu01
 
-declare @t_btggno nvarchar(20)
-declare @t_etggno nvarchar(20)
+declare @t_btggno nvarchar(50)
+declare @t_etggno nvarchar(50)
 declare @t_quatno nvarchar(30)
 declare @t_contract nvarchar(30)
-declare @t_ip nvarchar(20)
+declare @t_ip nvarchar(50)
 
 set @t_btggno = case when '#non'=[3] then '' else [3] end
 set @t_etggno = case when '#non'=[4] then char(255) else [4] end
@@ -20,7 +20,7 @@ declare @tmp table(
 	
 	logo nvarchar(max),
 	
-	tggno nvarchar(20),
+	tggno nvarchar(50),
 	tgg nvarchar(100),
 	paytype nvarchar(200),
 	quatno nvarchar(30),
@@ -92,11 +92,11 @@ dbo.getComma(mount,[8])mount
 --******************************************************************************
 z_ordcp_gu02:--z_ordcp_gu02
 
-declare @t_btggno nvarchar(20)
-declare @t_etggno nvarchar(20)
+declare @t_btggno nvarchar(50)
+declare @t_etggno nvarchar(50)
 declare @t_quatno nvarchar(30)
 declare @t_contract nvarchar(30)
-declare @t_ip nvarchar(20)
+declare @t_ip nvarchar(50)
 
 set @t_btggno = case when '#non'=[3] then '' else [3] end
 set @t_etggno = case when '#non'=[4] then char(255) else [4] end
@@ -115,7 +115,7 @@ declare @tmp table(
 	datea nvarchar(10),
 	memo nvarchar(MAX),
 	
-	tggno nvarchar(20),
+	tggno nvarchar(50),
 	tgg nvarchar(50),
 	productnos nvarchar(30),
 	products nvarchar(100),
@@ -156,7 +156,7 @@ select DISTINCT '1',mount,quatno,memo,tggno,tgg,datea,products,img1,img2,img3,im
 declare @rec int
 declare @quatno nvarchar(30)
 declare @xquatno nvarchar(30)
-declare @tggno nvarchar(20)
+declare @tggno nvarchar(50)
 declare	@tgg nvarchar(50)
 declare	@xtgg nvarchar(50)
 declare @products nvarchar(100)
@@ -326,11 +326,11 @@ from @tmp order by rec,gno ;
 --******************************************************************************
 z_ordcp_gu03:--z_ordcp_gu03
 
-declare @t_btggno nvarchar(20)
-declare @t_etggno nvarchar(20)
+declare @t_btggno nvarchar(50)
+declare @t_etggno nvarchar(50)
 declare @t_quatno nvarchar(30)
 declare @t_contract nvarchar(30)
-declare @t_ip nvarchar(20)
+declare @t_ip nvarchar(50)
 
 set @t_btggno = case when '#non'=[3] then '' else [3] end
 set @t_etggno = case when '#non'=[4] then char(255) else [4] end
@@ -347,7 +347,7 @@ declare @tmp table(
 	quatno nvarchar(30),
 	datea nvarchar(10),
 	
-	tggno nvarchar(20),
+	tggno nvarchar(50),
 	tgg nvarchar(50),
 	productnos nvarchar(30),
 	products nvarchar(100),
@@ -389,7 +389,7 @@ select DISTINCT '1',mount,quatno,tggno,tgg,datea,products,img1,img2,img3,img4,im
 declare @rec int
 declare @quatno nvarchar(30)
 declare @xquatno nvarchar(30)
-declare @tggno nvarchar(20)
+declare @tggno nvarchar(50)
 declare	@tgg nvarchar(50)
 declare	@xtgg nvarchar(50)
 declare @products nvarchar(100)
