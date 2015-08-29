@@ -185,6 +185,7 @@ declare @i int
 set @xordeno = 'xxxxxxxxxx'
 set @xproductno = 'xxxxxxxxxx'
 
+--合併spec
 declare cursor_table cursor for 
 select rec,ordeno,productno,product from @tmp where gno = '9'
 open cursor_table 
@@ -200,8 +201,7 @@ begin
 		select DISTINCT '8',comp,contract,@ordeno,customs,caseno from @tmp where ordeno = @ordeno
 	end
 	if(@productno != @xproductno)
-	begin	
-			
+	begin			
 		set @ncnt = (select COUNT(*) from @tmp where gno = '9' and ordeno = @ordeno and productno = @productno)
 			
 		set @no2 = (select no2 from @tmp where gno = '9' and rec = @rec and ordeno = @ordeno and productno = @productno)
@@ -234,7 +234,8 @@ begin
 		set @gweight = (select gweight from @tmp where gno = '9' and rec = @rec and ordeno = @ordeno and productno = @productno)*@ncnt
 		set @cuft = (select cuft from @tmp where gno = '9' and rec = @rec and ordeno = @ordeno and productno = @productno)*@ncnt
 		
-		update @tmp set no2 = @no2,mount = @mount where gno = '1' and ordeno = @ordeno and no2 = dbo.split(@no2,'-',0)	
+		if(CHARINDEX('-',@no2) > 1)
+			update @tmp set no2 = @no2,mount = @mount where gno = '1' and ordeno = @ordeno and no2 = dbo.split(@no2,'-',0)	
 			
 		set @no = @no + 1	
 		insert into @tmp(gno,rec,comp,contract,ordeno,customs,caseno,productno,product,no2,mount,unit,weight,gweight,cuft)
@@ -253,6 +254,7 @@ deallocate cursor_table
 
 delete @tmp where gno = '9' or gno = '8'
 
+--更新no2(箱號)
 declare @xno2 nvarchar(30)
 declare @min int 
 
@@ -270,6 +272,12 @@ begin
 	begin
 		set @min = (select MIN(rec) from @tmp where ordeno = @ordeno and no2 =@no2)
 		set @ccnt = (select COUNT(*) from @tmp where gno = '1' and ordeno = @ordeno and no2 =@no2)
+		print @no2
+		update @tmp set
+			 weight = (select SUM(weight) from @tmp where gno = '1' and no2 = @no2),
+			 gweight = (select SUM(gweight) from @tmp where gno = '1' and no2 = @no2),
+			 cuft = (select SUM(cuft) from @tmp where gno = '1' and no2 = @no2)
+		where gno = '1' and no2 = @no2
 	end
 	if(@ccnt > 1 and @rec > @min )
 	begin
@@ -285,8 +293,8 @@ close cursor_table
 deallocate cursor_table 
 
 
-insert into @tmp(gno,ordeno,mount,weight,gweight,cuft)
-select '3',ordeno,SUM(mount),SUM(weight),SUM(gweight),SUM(cuft)
+insert into @tmp(gno,ordeno,mount,mnt,weight,gweight,cuft)
+select '3',ordeno,SUM(mount),SUM(mnt),SUM(weight),SUM(gweight),SUM(cuft)
 from @tmp where gno = '1' group by ordeno
 
 update @tmp set no2 = (select MAX(no2) from @tmp where gno = '1') where gno = '3'
