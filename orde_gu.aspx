@@ -718,7 +718,7 @@
 				$('#txtOdate').focus();
 
 				if (!emp($('#txtCustno').val())) {
-					var t_where = "where=^^ noa='" + $('#txtCustno').val() + "' group by post,addr ^^";
+					var t_where = "where=^^ noa='" + $('#txtCustno').val() + "' ^^";
 					q_gt('custaddr', t_where, 0, 0, 0, "");
 				}
 			}
