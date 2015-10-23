@@ -723,21 +723,6 @@
 			function q_stPost() {
 				if (!(q_cur == 1 || q_cur == 2))
 					return false;
-					
-				//有達自動產生便品
-				if(q_getPara('sys.project').toUpperCase()=='XY'){
-					var isordc_ucc=false;
-					for (var j = 0; j < q_bbsCount; j++) {
-						if(!emp($('#txtProduct_'+j).val()) && emp($('#txtProductno_'+j).val())){
-							isordc_ucc=true;
-							break;
-						}
-					}
-					if(isordc_ucc){
-						var t_paras = $('#txtNoa').val()+ ';'+r_accy;
-						q_func('qtxt.query.ordc_ucc', 'cust_ucc_xy.txt,ordc_ucc,' + t_paras);
-					}
-				}
 			}
 			
 			function q_funcPost(t_func, result) {
