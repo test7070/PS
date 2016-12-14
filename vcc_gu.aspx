@@ -669,14 +669,13 @@
 							}
 						}
 						
-						//_btnDele();
-						Unlock(1);
-						//刪除packing & boaj
-						if (!confirm(mess_dele))
-		                    return;
-		                q_cur = 3;
-		                //清除get
-		                q_func('get_post.post.del', r_accy + ',' + $('#txtNoa').val() + ',0');						
+						if(!emp($('#txtNoa').val())){
+							//判斷get 是否有被產生
+							var t_where = "where=^^ noa='"+$('#txtNoa').val()+"' ^^";
+							q_gt('view_get', t_where, 0, 0, 0, "view_getexists_del");
+						}
+						
+											
 						break;
 					case 'btnModi':
 						var as = _q_appendData("umms", "", true);
@@ -751,6 +750,26 @@
 						var as = _q_appendData("view_get", "", true);
 						if (as[0] != undefined) {//存在
 							q_func('get_post.post', as[0].accy + ',' + $('#txtNoa').val() + ',1');
+						}
+						break;
+					case 'view_getexists_del':
+						var as = _q_appendData("view_get", "", true);
+						if (as[0] != undefined) {//存在
+							//_btnDele();
+							Unlock(1);
+							//刪除packing & boaj
+							if (!confirm(mess_dele))
+			                    return;
+			                q_cur = 3;
+			                //清除get
+			                q_func('get_post.post.del', r_accy + ',' + $('#txtNoa').val() + ',0');	
+						}else{
+							Unlock(1);
+							//刪除packing & boaj
+							if (!confirm(mess_dele))
+			                    return;
+			                q_cur = 3;
+							q_func('qtxt.query.delepackboaj', 'vcc.txt,delepackboaj_gu,' + encodeURI(r_accy) + ';' + encodeURI($('#txtNoa').val()));
 						}
 						break;
 				}
