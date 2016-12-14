@@ -148,7 +148,11 @@ left join ucc e on d.productno = e.noa
 left join tgg f on e.tggno = f.noa
 where(a.quatno is not null) and (c.tggno between @t_btggno and @t_etggno) and
 	 (LEN(@t_quatno) = 0 or a.noa = @t_quatno) and (LEN(@t_contract) = 0 or a.contract = @t_contract)
-and exists (select * from uca where noa=b.productno)	 
+and exists (select * from uca where noa=b.productno)
+
+update @tmp
+set tggno=b.tggno,tgg=b.comp
+from @tmp a left join (select * from uca) b on a.productno=b.noa	 
 
 insert into @tmp(gno,mount,quatno,memo,tggno,tgg,datea,products,img1,img2,img3,img4,img5,img6)
 select DISTINCT '1',mount,quatno,memo,tggno,tgg,datea,products,img1,img2,img3,img4,img5,img6 from @tmp
@@ -220,7 +224,7 @@ begin
 			end	
 			set @no = @no + 1
 			insert into @tmp(gno,rec,mount,quatno,datea,memo,tggno,tgg,products,product,spec,price,img1,img2,img3,img4,img5,img6)
-			select '0',@no,mount,quatno,datea,memo,@tggno,@tgg+'-',products+':',@product+':',@spec,@price,img1,img2,img3,img4,img5,img6 from @tmp where gno = '1' and quatno = @quatno and tggno = @tggno and products = @products
+			select '0',@no,mount,quatno,datea,memo,@tggno,@tgg+'-',products+':',@product+':',@spec,@price,img1,img2,img3,img4,img5,img6 from @tmp where gno = '9' and quatno = @quatno and tggno = @tggno and products = @products
 	end
 	
 	set @xquatno = @quatno	
@@ -382,6 +386,10 @@ where(a.quatno is not null) and (c.tggno between @t_btggno and @t_etggno) and
 	 (LEN(@t_quatno) = 0 or a.noa = @t_quatno) and (LEN(@t_contract) = 0 or a.contract = @t_contract)
 and exists (select * from uca where noa=b.productno)	 
 and exists (select * from view_ordc ca left join view_ordcs cb on ca.noa=cb.noa where d.productno=cb.productno and ca.quatno=b.noa)
+
+update @tmp
+set tggno=b.tggno,tgg=b.comp
+from @tmp a left join (select * from uca) b on a.productno=b.noa	
 
 insert into @tmp(gno,mount,quatno,tggno,tgg,datea,products,img1,img2,img3,img4,img5,img6)
 select DISTINCT '1',mount,quatno,tggno,tgg,datea,products,img1,img2,img3,img4,img5,img6 from @tmp
@@ -554,29 +562,10 @@ deallocate cursor_table
 
 declare @min int
 
-declare cursor_table cursor for 
-select rec,quatno,tggno,products from @tmp where gno = '2'
-open cursor_table 
-fetch next from cursor_table 
-into @rec,@quatno,@tggno,@products
-while(@@FETCH_STATUS <> -1) 
-begin
-	if(@tggno != @xtggno)
-	begin
-		set @min = (select MIN(rec) from @tmp where quatno = @quatno and tggno = @tggno and products = @products)
-		update @tmp set gno = '1' where rec = @rec and quatno = @quatno and tggno = @tggno and products = @products
-	end
-	if(@min < @rec)
-	begin
-		update @tmp set tgg = '' where rec = @rec and quatno = @quatno and tggno = @tggno and products = @products
-	end
-	
-	set @xtggno = @tggno	
+update @tmp
+set gno=case when b.rx=1 then 1 else 2 end
+from @tmp a left join (select ROW_NUMBER()over(partition by tggno order by rec)rx,rec from @tmp) b on a.rec=b.rec
+where gno=2
 
-	fetch next from cursor_table 
-	into @rec,@quatno,@tggno,@products
-end 
-close cursor_table 
-deallocate cursor_table
 
 select *,dbo.getComma(price,-1) prc from @tmp order by rec,gno ;
