@@ -128,18 +128,20 @@ declare @tmp table(
 	img3 nvarchar(max),
 	img4 nvarchar(max),
 	img5 nvarchar(max),
-	img6 nvarchar(max)
+	img6 nvarchar(max),
+	worker nvarchar(20)
 )
 
 insert into @tmp
-select '9',ROW_NUMBER() over (partition by a.noa,c.noa order by a.noa,e.tggno,c.noa,d.productno),b.mount,b.unit,a.noa,b.datea,b.memo,
-	   e.tggno,f.nick,c.noa,REPLACE(c.product,'~#$',"'"),d.productno,dbo.split(d.product,':',0)+':'+dbo.split(dbo.split(d.product,':',1),' ',0),d.spec,e.inprice,
+select '9',ROW_NUMBER() over (partition by a.noa,c.noa order by a.noa,e.tggno,c.noa,d.productno),b.mount,c.unit,a.noa,b.datea,b.memo,
+	   e.tggno,f.nick,c.noa,REPLACE(c.product,'~#$',"'"),d.productno,dbo.split(d.product,':',0)+':'+dbo.split(dbo.split(d.product,':',1),' ',0),d.spec,case when isnull(e.inprice,'')!='' then e.inprice else c.price end,
 	   case when dbo.split(c.images,char(59),0) != '' then '<img width="140px" src="http://'+@t_ip+'/images/upload/'+c.noa+'_'+dbo.split(c.images,char(59),0)+'">' else '' end,
 	   case when dbo.split(c.images,char(59),1) != dbo.split(c.images,char(59),0) then '<img width="140px" src="http://'+@t_ip+'/images/upload/'+c.noa+'_'+dbo.split(c.images,char(59),1)+'">' else '' end,
 	   case when dbo.split(c.images,char(59),2) != dbo.split(c.images,char(59),1) then '<img width="140px" src="http://'+@t_ip+'/images/upload/'+c.noa+'_'+dbo.split(c.images,char(59),2)+'">' else '' end,
 	   case when dbo.split(c.images,char(59),3) != dbo.split(c.images,char(59),2) then '<img width="140px" src="http://'+@t_ip+'/images/upload/'+c.noa+'_'+dbo.split(c.images,char(59),3)+'">' else '' end,
 	   case when dbo.split(c.images,char(59),4) != dbo.split(c.images,char(59),3) then '<img width="140px" src="http://'+@t_ip+'/images/upload/'+c.noa+'_'+dbo.split(c.images,char(59),4)+'">' else '' end,
-	   case when dbo.split(c.images,char(59),5) != dbo.split(c.images,char(59),4) then '<img width="140px" src="http://'+@t_ip+'/images/upload/'+c.noa+'_'+dbo.split(c.images,char(59),5)+'">' else '' end
+	   case when dbo.split(c.images,char(59),5) != dbo.split(c.images,char(59),4) then '<img width="140px" src="http://'+@t_ip+'/images/upload/'+c.noa+'_'+dbo.split(c.images,char(59),5)+'">' else '' end,
+	   a.worker
 from view_orde a
 left join view_ordes b on a.noa = b.noa
 left join uca c on b.productno = c.noa
@@ -223,8 +225,8 @@ begin
 				end
 			end	
 			set @no = @no + 1
-			insert into @tmp(gno,rec,mount,quatno,datea,memo,tggno,tgg,products,product,spec,price,img1,img2,img3,img4,img5,img6)
-			select '0',@no,mount,quatno,datea,memo,@tggno,@tgg+'-',products+':',@product+':',@spec,@price,img1,img2,img3,img4,img5,img6 from @tmp where gno = '9' and quatno = @quatno and tggno = @tggno and products = @products
+			insert into @tmp(gno,rec,mount,unit,quatno,datea,memo,tggno,tgg,products,product,spec,price,img1,img2,img3,img4,img5,img6,worker)
+			select '0',@no,mount,unit,quatno,datea,memo,@tggno,@tgg+'-',products+':',@product+':',@spec,@price,img1,img2,img3,img4,img5,img6,worker from @tmp where gno = '9' and quatno = @quatno and tggno = @tggno and products = @products
 	end
 	
 	set @xquatno = @quatno	
@@ -308,8 +310,10 @@ begin
 	end	
 	if(@rec = @max)
 	begin
-		insert into @tmp(gno,rec,quatno,datea,memo,img1,img2,img3,img4,img5,img6)
-		select '2',rec,quatno,CONVERT(varchar(10),GETDATE(),111),memo,img1,img2,img3,img4,img5,img6 from @tmp where rec = @rec and quatno = @quatno
+		insert into @tmp(gno,rec,quatno,datea,memo,img1,img2,img3,img4,img5,img6,worker) 
+		select '2',rec,a.quatno,CONVERT(varchar(10),GETDATE(),111),a.memo,img1,img2,img3,img4,img5,img6,b.worker
+		from @tmp a left join view_ordc b on a.quatno=b.quatno
+		where rec = @rec and a.quatno = @quatno
 	end
 	
 	set @xquatno = @quatno
@@ -350,7 +354,7 @@ declare @tmp table(
 	mount float,
 	quatno nvarchar(30),
 	datea nvarchar(10),
-	
+	unit nvarchar(10),
 	tggno nvarchar(50),
 	tgg nvarchar(50),
 	productnos nvarchar(30),
@@ -368,7 +372,7 @@ declare @tmp table(
 )
 
 insert into @tmp
-select '9',ROW_NUMBER() over (partition by a.noa,c.noa order by a.noa,e.tggno,c.noa,d.productno),b.mount,a.noa,b.datea,
+select '9',ROW_NUMBER() over (partition by a.noa,c.noa order by a.noa,e.tggno,c.noa,d.productno),b.mount,a.noa,b.datea,c.unit,
 	   e.tggno,f.nick,c.noa,REPLACE(c.product,'~#$',"'"),d.productno,dbo.split(d.product,':',0)+':'+dbo.split(dbo.split(d.product,':',1),' ',0),d.spec,e.inprice,
 	   case when dbo.split(c.images,char(59),0) != '' then '<img width="140px" src="http://'+@t_ip+'/images/upload/'+c.noa+'_'+dbo.split(c.images,char(59),0)+'">' else '' end,
 	   case when dbo.split(c.images,char(59),1) != dbo.split(c.images,char(59),0) then '<img width="140px" src="http://'+@t_ip+'/images/upload/'+c.noa+'_'+dbo.split(c.images,char(59),1)+'">' else '' end,
@@ -460,8 +464,8 @@ begin
 				end
 			end	
 			set @no = @no + 1
-			insert into @tmp(gno,rec,mount,quatno,datea,tggno,tgg,products,product,spec,price,img1,img2,img3,img4,img5,img6)
-			select '2',@no,mount,quatno,datea,@tggno,@tgg+'-',products+':',@product+':',@spec,@price,img1,img2,img3,img4,img5,img6 from @tmp where gno = '1' and quatno = @quatno and tggno = @tggno and products = @products
+			insert into @tmp(gno,rec,mount,unit,quatno,datea,tggno,tgg,products,product,spec,price,img1,img2,img3,img4,img5,img6)
+			select '2',@no,mount,unit,quatno,datea,@tggno,@tgg+'-',products+':',@product+':',@spec,@price,img1,img2,img3,img4,img5,img6 from @tmp where gno = '1' and quatno = @quatno and tggno = @tggno and products = @products
 	end
 	
 	set @xquatno = @quatno	

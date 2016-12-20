@@ -1455,7 +1455,9 @@
 					<td align="center" style="width:40px;">
 						<input class="btn"  id="btnPlus" type="button" value='＋' style="font-weight: bold;width:" />
 					</td>
-					<!--<td align="center" style="width:180px"><a id='lblProductno_s'> </a></td>-->
+					<!--<td align="center" style="width:180px"><a id='lblProductno_s'> </a></td> 
+					vcc只算出貨金額不扣料，依據packing轉get領料	
+					-->
 					<td align="center" style="width:250px;"><a id='lblProduct_s'> </a></td>
 					<td align="center" style="width:95px;" class="isStyle"><a id='lblStyle_s'> </a></td>
 					<td align="center" style="width:40px;"><a id='lblUnit_s'> </a></td>
