@@ -37,7 +37,7 @@
                         name : 'xtgg',
                         dbf : 'tgg',
                         index : 'noa,comp',
-                        src : 'tgg.aspx'
+                        src : 'tgg_b.aspx'
                     }, {/*1-2 [5]*/
                         type : '6',
                         name : 'xquatno'
