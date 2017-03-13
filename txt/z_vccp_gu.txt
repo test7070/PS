@@ -25,7 +25,7 @@ declare @tmp table(
 	addr nvarchar(90),
 	cldate nvarchar(20),
 	tel nvarchar(90),
-	mark nvarchar(50),
+	main nvarchar(50),
 	trancomp nvarchar(100),
 	boat nvarchar(100),
 	sono nvarchar(50),
@@ -59,8 +59,8 @@ begin
 
 	if(@noa != @xnoa)
 	begin
-		insert into @tmp(gno,rec,noa,addr,cldate,tel,mark,trancomp,boat,sono,goal)
-		select '1',rec,noa,addr,cldate,tel,mark,trancomp,boat,sono,goal from @tmp where rec = @rec and noa = @noa
+		insert into @tmp(gno,rec,noa,addr,cldate,tel,main,trancomp,boat,sono,goal)
+		select '1',rec,noa,addr,cldate,tel,main,trancomp,boat,sono,goal from @tmp where rec = @rec and noa = @noa
 	end
 	
 	set @xnoa = @noa
