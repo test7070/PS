@@ -1,0 +1,238 @@
+﻿z_invop_gu01:--z_invop_gu01
+
+declare @t_noa nvarchar(30)
+declare @t_ip nvarchar(50)
+set @t_ip = case when '#non' = '[2]' then '' else '[2]' end
+set @t_noa = case when '#non' = [3] then '' else [3] end
+---------------------------------------------------------------------------------
+SET QUOTED_IDENTIFIER OFF
+
+declare @tmp table(
+	gno nvarchar(1),
+	rec int,	
+	
+	noa nvarchar(30),
+	contract nvarchar(30),
+	datea nvarchar(10),
+	invoice nvarchar(100),
+	comp nvarchar(50),
+	addr nvarchar(max),
+	shipped nvarchar(50),
+	per nvarchar(50),
+	sailing nvarchar(50),
+	froma nvarchar(50),
+	toa nvarchar(50),
+	bank nvarchar(100),
+	lcno nvarchar(50),
+	lcdated nvarchar(20),
+	
+	productnos nvarchar(100),
+	products nvarchar(200),
+	productno nvarchar(30),
+	product nvarchar(100),
+	unit  nvarchar(100),
+	spec nvarchar(50),
+	aspec nvarchar(50),
+	cspec nvarchar(50),
+	quantity float,
+	coin nvarchar(20),
+	price float,
+	amount float,
+	memo nvarchar(MAX),
+	
+	main nvarchar(max),
+	side nvarchar(max),
+	remark nvarchar(max)
+)
+
+--製成品原料=9 原料=8
+insert into @tmp
+select 
+	'9',ROW_NUMBER() over (order by a.noa),
+	a.noa,a.contract,a.datea,a.title,a.comp,a.addr,a.shipped,a.per,a.sailing,a.froma,a.toa,c.negotiatingbank,c.lcno,c.lcdated,
+	b.productno,REPLACE(b.description,'~#$',"'"),e.productno,e.product,b.unit,'',e.spec,f.spec,b.quantity,a.coin,b.price,b.amount,b.memo,
+	REPLACE(d.main,'chr(10)','<br>'),REPLACE(REPLACE(d.side,'~#$',"'"),'chr(10)','<br>'),REPLACE(a.memo,'chr(10)','<br>')
+from invo a	
+left join invos b on a.noa = b.noa
+left join view_vcc v on a.vccno=v.noa
+left join view_ordei c on v.ordeno = c.noa
+left join boaj d on a.vccno = d.noa
+left join ucas e on b.productno = e.noa
+left join ucc f on b.productno = f.noa
+where (a.noa = @t_noa)
+
+update @tmp set gno = '8' where productno is null
+
+insert into @tmp(gno,noa,contract,datea,invoice,comp,addr,shipped,per,sailing,froma,toa,bank,lcno,lcdated,main,side,remark)
+select DISTINCT '1',noa,contract,datea,invoice,comp,addr,shipped,per,sailing,froma,toa,bank,lcno,lcdated,main,side,remark from @tmp
+
+declare @gno nvarchar(1)
+declare @rec int
+declare @noa nvarchar(30)
+declare @xnoa nvarchar(30)
+declare @tggno nvarchar(20)
+declare	@tgg nvarchar(50)
+declare	@xtgg nvarchar(50)
+declare @productnos nvarchar(100)
+declare @xproductnos nvarchar(200)
+declare @products nvarchar(200)
+declare @productno nvarchar(30)
+declare @product nvarchar(100)
+declare @xproduct nvarchar(100)
+declare @unit nvarchar(50)
+declare @spec nvarchar(50)
+declare @quantity float
+declare @price float
+declare @amount float
+declare @memo nvarchar(MAX)
+declare @coin nvarchar(50)
+declare @img nvarchar(max)
+
+declare @no int
+declare @cnt int
+declare @max int
+declare @i int
+declare @cnts int
+declare @is int
+declare @str nvarchar(100)
+
+set @xnoa = 'xxxxxxxxxx'
+set @xtgg = 'xxxxxxxxxx'
+set @xproductnos = 'xxxxxxxxxx'
+set @xproduct = 'xxxxxxxxxx'
+
+declare cursor_table cursor for 
+select gno,rec,noa,productnos,products,productno,product,unit,coin from @tmp where gno = '9' or gno = '8'
+open cursor_table 
+fetch next from cursor_table 
+into @gno,@rec,@noa,@productnos,@products,@productno,@product,@unit,@coin
+while(@@FETCH_STATUS <> -1) 
+begin
+	if(@noa != @xnoa)
+		set @no = 0
+	
+	if(@productnos != @xproductnos or @product != @xproduct)
+	begin
+		--製成品
+		if(@gno = '9')
+		begin
+			set @cnt = (select COUNT(*) from @tmp where gno = '9' and noa = @noa  and products = @products and product = @product)
+			set @max = (select MAX(rec) from @tmp where gno = '9' and noa = @noa  and products = @products and product = @product)
+			set @i = 0
+			set @spec = ''
+			set @price = 0
+			
+			while(@i < @cnt)
+			begin
+				set @str = (select aspec from @tmp where gno = '9' and rec = @rec+@i and noa = @noa and products = @products and product = @product)
+				if(RIGHT(@str,2) = 'mm' and @rec+@i != @max)
+				begin
+					set @str = REPLACE(@str,'mm','')
+				end
+
+				if(@i = 0)
+				begin
+					set @spec = @spec + @str
+					set @i = @i +1	
+				end	
+				else
+				begin	
+					set @spec = @spec + '-' + @str
+					set @i = @i +1
+				end
+			end	
+				set @quantity = (select quantity from @tmp where gno = '9' and rec = @rec and noa = @noa and products = @products and product = @product)		
+				set @price = (select price from @tmp where gno = '9' and rec = @rec and noa = @noa and products = @products and product = @product)		
+				set @amount = (select amount from @tmp where gno = '9' and rec = @rec and noa = @noa and products = @products and product = @product)		
+				set @memo = (select memo from @tmp where gno = '9' and rec = @rec and noa = @noa and products = @products and product = @product)		
+			
+			set @no = @no + 1
+			insert into @tmp(gno,rec,noa,contract,datea,invoice,comp,addr,shipped,per,sailing,froma,toa,bank,lcno,lcdated,productnos,products,productno,product,spec,quantity,coin,price,amount,memo,main,side,remark)
+			select '3',@no,noa,contract,datea,invoice,comp,addr,shipped,per,sailing,froma,toa,bank,lcno,lcdated,@productnos,@products,@productno,@product,@spec,@quantity,@coin,@price,@amount,@memo,main,side,remark from @tmp where gno = '1' and noa = @noa
+		end
+		
+		--原料
+		else if(@gno = '8')
+		begin
+			set @spec = (select cspec from @tmp where gno = '8' and rec = @rec and noa = @noa and products = @products)
+			set @quantity = (select quantity from @tmp where gno = '8' and rec = @rec and noa = @noa and products = @products)		
+			set @price = (select price from @tmp where gno = '8' and rec = @rec and noa = @noa and products = @products)		
+			set @amount = (select amount from @tmp where gno = '8' and rec = @rec and noa = @noa and products = @products)		
+			set @memo = (select memo from @tmp where gno = '8' and rec = @rec and noa = @noa and products = @products)		
+			
+			set @no = @no + 1
+			insert into @tmp(gno,rec,noa,contract,datea,invoice,comp,addr,shipped,per,sailing,froma,toa,bank,lcno,lcdated,productnos,products,productno,product,unit,spec,quantity,coin,price,amount,memo,main,side,remark)
+			select '2',@no,noa,contract,datea,invoice,comp,addr,shipped,per,sailing,froma,toa,bank,lcno,lcdated,@productnos,@products,@productnos,@products,@unit,@spec,@quantity,@coin,@price,@amount,@memo,main,side,remark from @tmp where gno = '1' and noa = @noa
+			
+			--插入備註
+			if(len(@memo)>0)
+			begin
+				set @cnt = LEN(@memo) - LEN(REPLACE(@memo,'{',''))
+				set @i =0
+				set @img = ''
+				while (@i < @cnt)
+				begin
+					set @img = @img +'<img width="140px" src="http://'+@t_ip+'/images/upload/'+@productnos+'_'+dbo.split(dbo.split(@memo,'{',@i+1),'}',0)+'.JPG">'
+						set @i = @i + 1
+				end	
+				set @memo = case when len(@img)>0 then dbo.split(@memo,'{',0)+'<br>'+@img else @memo end
+				
+				insert into @tmp(gno,rec,noa,contract,datea,invoice,comp,addr,shipped,per,sailing,froma,toa,bank,lcno,lcdated,productnos,products,productno,product,unit,spec,quantity,coin,price,amount,memo,main,side,remark)
+				select '4',@no,noa,contract,datea,invoice,comp,addr,shipped,per,sailing,froma,toa,bank,lcno,lcdated,@productnos,@products,@productnos,@products,@unit,@spec,@quantity,@coin,@price,@amount,@memo,main,side,remark from @tmp where gno = '1' and noa = @noa
+			end
+		end
+	end
+	if(@productnos != @xproductnos and @gno = '9')
+	begin		
+		insert into @tmp(gno,rec,noa,contract,datea,invoice,comp,addr,shipped,per,sailing,froma,toa,bank,lcno,lcdated,productnos,products,productno,product,unit,spec,quantity,coin,price,amount,memo,main,side,remark)
+		select '2',@no,noa,contract,datea,invoice,comp,addr,shipped,per,sailing,froma,toa,bank,lcno,lcdated,@productnos,@products,@productno,@product,@unit,@spec,@quantity,@coin,@price,@amount,@memo,main,side,remark from @tmp where gno = '1' and noa = @noa
+		
+		if(len(@memo)>0)
+		begin
+			set @cnt = LEN(@memo) - LEN(REPLACE(@memo,'{',''))
+			set @i =0
+			set @img = ''
+			while (@i < @cnt)
+			begin
+				set @img = @img +'<img width="140px" src="http://'+@t_ip+'/images/upload/'+@productno+'_'+dbo.split(dbo.split(@memo,'{',@i+1),'}',0)+'.JPG">'
+					set @i = @i + 1
+			end	
+			set @memo = case when len(@img)>0 then dbo.split(@memo,'{',0)+'<br>'+@img else @memo end
+			--插入備註
+			insert into @tmp(gno,rec,noa,contract,datea,invoice,comp,addr,shipped,per,sailing,froma,toa,bank,lcno,lcdated,productnos,products,productno,product,unit,spec,quantity,coin,price,amount,memo,main,side,remark)
+			select '4',@no,noa,contract,datea,invoice,comp,addr,shipped,per,sailing,froma,toa,bank,lcno,lcdated,@productnos,@products,@productno,@product,@unit,@spec,@quantity,@coin,@price,@amount,@memo,main,side,remark from @tmp where gno = '1' and noa = @noa
+		end
+	end
+	set @xnoa = @noa	
+	set @xproductnos = @productnos
+	set @xproduct = @product
+	
+	fetch next from cursor_table 
+	into @gno,@rec,@noa,@productnos,@products,@productno,@product,@unit,@coin
+end 
+close cursor_table 
+deallocate cursor_table 
+
+update a set rec=(select MAX(rec) from @tmp where (gno='3' or gno='2') and productnos=a.productnos) 
+from @tmp a where gno='4'
+
+delete @tmp where gno = '8' or gno = '9'
+
+insert into @tmp(gno,rec,noa,quantity,amount,unit,coin)
+select '5','999999999',noa,SUM(quantity),SUM(amount),MAX(unit),MAX(coin)
+from @tmp where gno = '2' group by noa
+
+insert into @tmp(gno,rec,noa,datea,main,side,contract,remark)
+select DISTINCT '6','999999999',noa,datea,main,side,contract,remark
+from @tmp where gno = '2'
+
+select 
+	gno,rec,noa,contract
+	,case when len(datea)=10 then replace(CONVERT(varchar(20),cast(datea as datetime),6),' ','-')  --西元
+	when len(datea)=9 then replace(CONVERT(varchar(20),cast(dbo.ChineseEraName2AD(datea) as datetime),6),' ','-') --民國 
+	else datea end datea
+	,invoice,comp,addr,shipped,per,sailing,froma,toa,bank,lcno,lcdated,productnos,products,productno,product,spec
+	,dbo.getComma(quantity,0)+' '+isnull(unit,'') quantity
+	,coin+'$' +dbo.getComma(price,2) price,coin+'$' +dbo.getComma(amount,2) amount,memo,main,side,remark
+	,isnull((select ib.nick from invo ia left join cust ib on ia.custno=ib.noa where ia.noa=a.noa),'') custsign
+from @tmp a order by noa,rec,gno ;

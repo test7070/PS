@@ -1,0 +1,170 @@
+﻿z_quatp_gu01:--z_quatp_gu01
+declare @t_noa nvarchar(50)
+declare @t_ip nvarchar(20)
+set @t_noa = case when '#non' = [1] then '' else [1] end
+set @t_ip = case when '#non' = '[2]' then '' else '[2]' end
+--------------------------------------------------------------------------------
+SET QUOTED_IDENTIFIER OFF
+
+declare @tmp table(
+	gno nvarchar(1),
+	rec int,
+	logo nvarchar(max),
+	q_productno nvarchar(30),
+	q_product nvarchar(100),
+	product nvarchar(100),
+	spec1 nvarchar(50),
+	spec2 nvarchar(50),
+	memo nvarchar(max),
+	img nvarchar(max),
+	total float
+)
+insert into @tmp
+select '0',ROW_NUMBER() over (partition by LEFT(a.productno,7) order by a.product),''
+,a.productno,REPLACE(a.product,'~#$',"'"),b.product,a.spec,b.spec,a.memo,'',a.total
+from view_quats a
+left join ucas b on a.productno = b.noa
+left join ucc c on a.productno = c.noa
+where a.noa = @t_noa
+
+--製成品原料=8,原料=5
+update @tmp set gno = case when product is not null then '8' else '5' end 
+--取出廠牌
+update @tmp set product = dbo.split(dbo.split(product,':',1),' ',0) 
+
+declare @rec nvarchar(100)
+declare @q_productno nvarchar(30)
+declare @q_xproductno nvarchar(30)  
+declare @product nvarchar(100)
+declare @xproduct nvarchar(100)
+declare @spec nvarchar(50)
+declare @memo nvarchar(max)
+declare @cnt int
+declare @max int
+declare @i int
+declare @str nvarchar(100)
+declare @img nvarchar(max)
+
+set @q_xproductno = 'xxxxxx'
+set @xproduct = 'xxxxxx'
+
+ --製成品原料合併&圖片顯示
+declare cursor_table cursor for 
+select rec,q_productno,product,memo from @tmp where gno = '8' 
+open cursor_table 
+fetch next from cursor_table 
+into @rec,@q_productno,@product,@memo
+while(@@FETCH_STATUS <> -1) 
+begin
+	if(@q_productno != @q_xproductno)
+	begin
+		--取出要顯示的圖片{}
+		set @cnt = LEN(@memo) - LEN(REPLACE(@memo,'{',''))
+		set @i =0
+		set @img = ''
+		while (@i < @cnt)
+		begin
+			set @img = @img +'<img width="140px" src="http://'+@t_ip+'/images/upload/'+@q_productno+'_'+dbo.split(dbo.split(@memo,'{',@i+1),'}',0)+'.JPG">'
+			print @img
+			set @i = @i + 1
+		end	
+		set @memo = dbo.split(@memo,'{',0)+'<br>'+dbo.split(@memo,'}',99)
+		
+		insert into @tmp(gno,q_productno,q_product,memo,total)
+		select '1',q_productno,q_product,@memo,total from @tmp where gno = '8' and rec = @rec
+		if(LEN(@img)>0)
+		begin
+			insert into @tmp(gno,q_productno,q_product,memo,img,total)
+			select '3',q_productno,q_product,@memo,@img,total from @tmp where gno = '8' and rec = @rec
+		end
+	end
+	 --製成品原料合併spec
+	if(@product != @xproduct)
+	begin 			
+		set @cnt = (select COUNT(*) from @tmp where gno = '8' and q_productno = @q_productno and product = @product)
+		set @max = (select MAX(rec) from @tmp where gno = '8' and q_productno = @q_productno and product = @product) 
+		set @i = 0
+		set @str = ''
+		while(@i < @cnt)
+		begin
+			set @spec = (select spec2 from @tmp where gno = '8' and rec = @rec+@i and  q_productno = @q_productno and product = @product)
+			if(RIGHT(@spec,2) = 'mm' and @rec+@i != @max)
+			begin
+				set @spec = REPLACE(@spec,'mm','')
+			end
+			if(@i = 0)
+			begin
+				set @str = @str + @spec
+				set @i = @i +1	
+			end	
+			else
+			begin	
+				set @str = @str + ',' + @spec
+				set @i = @i +1
+			end
+		end		
+		insert into @tmp(gno,q_productno,product,spec1)
+		values('2',@q_productno,@product,@str)
+	end
+		
+	set @q_xproductno = @q_productno
+	set @xproduct = @product
+	
+	fetch next from cursor_table 
+	into @rec,@q_productno,@product,@memo
+end 
+close cursor_table 
+deallocate cursor_table 
+ 
+delete @tmp where gno = '8'
+
+declare @q_product nvarchar(100)
+declare @q_xproduct nvarchar(100)  
+
+set @q_xproduct = 'xxxxxx'
+
+--原料圖片顯示 原料第一行顯示品名 之後只要顯示spec 
+declare cursor_table cursor for 
+select rec,q_productno,q_product,memo from @tmp where gno = '5' 
+open cursor_table 
+fetch next from cursor_table 
+into @rec,@q_productno,@q_product,@memo
+while(@@FETCH_STATUS <> -1) 
+begin
+	--取出要顯示的圖片{}
+	if(@q_product != @q_xproduct)
+	begin 
+		set @cnt = LEN(@memo) - LEN(REPLACE(@memo,'{',''))
+		set @i =0
+		set @img = ''
+		while (@i < @cnt)
+		begin
+			set @img = @img +'<img width="140px" src="http://'+@t_ip+'/images/upload/'+@q_productno+'_'+dbo.split(dbo.split(@memo,'{',@i+1),'}',0)+'.JPG">'
+			print @img
+			set @i = @i + 1
+		end	
+		set @memo = dbo.split(@memo,'{',0)+'<br>'+dbo.split(@memo,'}',99)
+			
+		insert into @tmp(gno,q_productno,q_product,memo)
+		select '4',q_productno,q_product,@memo from @tmp where gno = '5' and rec = @rec and q_product = @q_product
+		
+		if(LEN(@img)>0)
+		begin
+			insert into @tmp(gno,q_productno,q_product,memo,img)
+			select '6',q_productno,q_product,@memo,@img from @tmp where gno = '5' and rec = @rec and q_product = @q_product
+		end
+	end	
+	set @q_xproduct = @q_product
+	
+	fetch next from cursor_table 
+	into @rec,@q_productno,@q_product,@memo
+end 
+close cursor_table 
+deallocate cursor_table 
+ 
+update @tmp set logo = '<img width="160px" src="http://59.125.143.171/images/logo_gu.png">'
+ 
+select 
+	gno,DENSE_RANK() over (order by left(q_productno,7)) rec,logo,
+	q_productno,q_product,product,spec1,memo,dbo.getComma(total,0) total ,img
+from @tmp order by q_productno,gno  ;
