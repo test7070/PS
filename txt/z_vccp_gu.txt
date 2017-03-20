@@ -31,7 +31,7 @@ declare @tmp table(
 )
 insert into @tmp
 select '0','',ROW_NUMBER() over (partition by a.noa order by a.noa),a.noa,
-	   b.datea,a.comp,a.tel,b.ordeno,REPLACE(b.product,'~#$','"'),b.mount,b.weight,b.theory,
+	   b.datea,a.comp,a.tel,b.ordeno,REPLACE(b.product,'~#$','"'),sum(b.mount),sum(b.weight),sum(b.theory),
 	   c.deivery_addr,c.cldate,c.bcomp+' '+d.tel,e.main,c.trancomp,c.boatname+'/'+c.ship,c.sono,c.goal
 from view_vcc a
 left join view_vccs b on a.noa=b.noa
@@ -62,7 +62,7 @@ begin
 	set @xnoa = @noa
 	fetch next from cursor_table 
 	into @rec,@noa	
-end 
+end
 close cursor_table 
 deallocate cursor_table 
 
@@ -70,7 +70,7 @@ update @tmp set datea = dbo.split(datea,'/',0)+'年'+dbo.split(datea,'/',1)+'月
 update @tmp set logo = '<img width="160px" src="http://59.125.143.171/images/logo_gu.png">'
 
 select
-	*,dbo.getComma(mount,0) mnt,dbo.getComma(weight,2) weit
+	*,sum(dbo.getComma(mount,0)) mnt,sum(dbo.getComma(weight,2)) weit
 from @tmp order by noa,gno;
 
 --*******************************************************************************

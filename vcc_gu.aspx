@@ -1158,7 +1158,6 @@
 				var re = /(\d{1,3})(?=(\d{3})+$)/g;
 				return xx + arr[0].replace(re, "$1,") + (arr.length == 2 ? "." + arr[1] : "");
 			}
-			
 		</script>
 		<style type="text/css">
 			#dmain {
@@ -1434,7 +1433,7 @@
 						<td colspan='2'><input id="txtTotalus" type="text" class="txt num c1"/></td>
 						<td><input id="btnPack" type="button" style="float: right;"/></td>
 					</tr>
-					<tr>
+					<tr> 
 						<td><span> </span><a id="lblWorker" class="lbl"> </a></td>
 						<td><input id="txtWorker" type="text" class="txt c1"/></td>
 						<td><input id="txtWorker2" type="text" class="txt c1"/></td>
