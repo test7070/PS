@@ -1,7 +1,7 @@
 ﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" dir="ltr">
     <head>
-        <title></title>
+        <title> </title>
         <script src="../script/jquery.min.js" type="text/javascript"></script>
         <script src='../script/qj2.js' type="text/javascript"></script>
         <script src='qset.js' type="text/javascript"></script>
@@ -1363,14 +1363,14 @@
             <div style="float:left;width:800px;border-radius:5px;"><!---右--->
                 <table class="tbbm" id="tbbm">
                     <tr style="height:1px;">
-                        <td colspan="8" class="tdZ"></td>
+                        <td colspan="8" class="tdZ"> </td>
                     </tr>
                     <tr>
                         <td><span> </span><a id='lblOdate' class="lbl"> </a></td>
                         <td><input id="txtOdate" type="text" class="txt c1"/></td>
-                        <td align="center" ><select id="cmbStype" class="txt c1"></select></td>
+                        <td align="center" ><select id="cmbStype" class="txt c1"> </select></td>
                         <td><span> </span><a id='lblKind' class="lbl"> </a></td>
-                        <td><select id="cmbKind" class="txt c1"></select></td>
+                        <td><select id="cmbKind" class="txt c1"> </select></td>
                         <td><span> </span><a id='lblNoa' class="lbl"> </a></td>
                         <td colspan="2"><input id="txtNoa"   type="text" class="txt c1"/></td>
                     </tr>
@@ -1400,12 +1400,12 @@
                         <td><span> </span><a id='lblTel' class="lbl"> </a></td>
                         <td colspan='4'><input id="txtTel" type="text" class="txt c1"/></td>
                         <td><span> </span><a id='lblTrantype' class="lbl"> </a></td>
-                        <td colspan="2"><select id="cmbTrantype" class="txt c1" name="D1" ></select></td>
+                        <td colspan="2"><select id="cmbTrantype" class="txt c1" name="D1" > </select></td>
                     </tr>
                     <tr>
                         <td><span> </span><a id='lblFax' class="lbl"> </a></td>
                         <td colspan="4"><input id="txtFax" type="text" class="txt c1" /></td>
-                        <td colspan="3"></td>
+                        <td colspan="3"> </td>
                     </tr>
                     <tr>
 						<td><span> </span><a id='lblAddr' class="lbl"> </a></td>
@@ -1413,7 +1413,7 @@
                             <input id="txtPost"  type="text" style="float:left;width:15%;"/>
                             <input id="txtAddr"  type="text" style="float:left;width:75%;" />
                         </td>
-						<td></td>
+						<td> </td>
                     </tr>
                     <tr>
                         <td><span> </span><a id='lblAddr2' class="lbl"> </a></td>
@@ -1421,22 +1421,22 @@
                             <input id="txtPost2"  type="text" style="float:left;width:15%;"/>
                             <input id="txtAddr2"  type="text" style="float:left;width:75%;" />
                         </td>
-						<td></td>
+						<td> </td>
                     </tr>
                     <tr>
 						<td><span> </span><a id='lblPaytype' class="lbl"> </a></td>
                         <td colspan="2">
 							<input id="txtPaytype" type="text" style="float:left; width:60%;"/>
-							<select id="combPaytype" style="float:left; width:20px;"></select>
+							<select id="combPaytype" style="float:left; width:20px;"> </select>
 						</td>
 						<td colspan="2">
-							<a id='lblFloata' style="float:left;color:black;font-size:medium;"></a> 
+							<a id='lblFloata' style="float:left;color:black;font-size:medium;"> </a> 
 							<input id="txtFloata" type="text" style="float:left; width:60%;"/>
 							<select id="cmbCoin" style="float:left;width:20px;" onchange='coin_chg()'> </select>
 						</td>
 						<td><span> </span><a id='lblWeight' class="lbl"> </a></td>
 						<td><input id="txtWeight"  type="text" class="txt num c1"/></td>
-						<td></td>
+						<td> </td>
                     </tr>
                     <tr>
                         <td><span> </span><a id='lblMoney' class="lbl"> </a></td>
@@ -1448,11 +1448,11 @@
 						</td>
                         <td><span> </span><a id='lblTotal' class="lbl"> </a></td>
                         <td><input id="txtTotal" type="text" class="txt num c1"/></td>
-                        <td></td>
+                        <td> </td>
                     </tr>
                     <tr>
                         <td><span> </span><a id='lblMemo' class="lbl"> </a></td>
-                        <td colspan="6"><textarea id="txtMemo" cols="10" rows="5" style="height: 50px;" class="txt c1"></textarea></td>
+                        <td colspan="6"><textarea id="txtMemo" cols="10" rows="5" style="height: 50px;" class="txt c1"> </textarea></td>
                         <td align="center"><input id="btnCredit" type="button" value='' /></td>
                     </tr>
                     <tr>
@@ -1463,11 +1463,11 @@
                         <td><input id="btnApv" type="button" style="width:50%;float:right;" value="核准"/></td>
                         <td><input id="txtApv" type="text" class="txt c1" disabled="disabled"/></td>
                         <td align="center">
-							<span></span><a id='lblEnd' class="lbl"></a>
+							<span> </span><a id='lblEnd' class="lbl"> </a>
 							<input id="chkEnda" type="checkbox"/>
 						</td>
                         <td align="center">
-                            <span></span><a id='lblIsproj' class="lbl"></a>
+                            <span> </span><a id='lblIsproj' class="lbl"> </a>
 							<input id="chkIsproj" type="checkbox"/>
                         </td>
                     </tr>
