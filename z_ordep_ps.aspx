@@ -15,52 +15,49 @@
 		<script src="css/jquery/ui/jquery.ui.widget.js"> </script>
 		<script src="css/jquery/ui/jquery.ui.datepicker_tw.js"> </script>
 		<script type="text/javascript">
-            if (location.href.indexOf('?') < 0) {
-                location.href = location.href + "?;;;;"+((new Date()).getUTCFullYear()-1911);
-            }
             $(document).ready(function() {
-            	q_getId();
-                q_gf('', 'z_vccp_gu');
+                _q_boxClose();
+                q_getId();
+                q_gf('', 'z_ordep_ps');
             });
             function q_gfPost() {
-               $('#q_report').q_report({
-                        fileName : 'z_vccp_gu',
-                        options : [{
-	                        type : '0', //[1]
-	                        name : 'accy',
-	                        value : r_accy
-	                    },{
-	                        type : '1', //[2][3]
-	                        name : 'xnoa'
-	                    }]
-                    });
+                $('#q_report').q_report({
+                    fileName : 'z_ordep_ps',
+                    options : [{//[1]
+						type : '0',
+						name : 'accy',
+                        value : q_getId()[4] 
+                    },{//1  [2][3]
+                        type : '1',
+                        name : 'xnoa'
+                    },{
+						type : '8',//[4]
+						name : 'xshow',
+						value : "1@".split(',')
+	                }]
+                });
                 q_popAssign();
-                
-                $('#txtXdate1').mask('999/99/99');
-                $('#txtXdate2').mask('999/99/99');
-                
-                $('#txtXdate1').val(q_cdn(q_date(),1));
-                $('#txtXdate2').val(q_cdn(q_date(),1));
-	                
-	            var t_noa=typeof(q_getId()[3])=='undefined'?'':q_getId()[3];
-                t_noa  =  t_noa.replace('noa=','');
-                $('#txtXnoa1').val(t_noa);
-                $('#txtXnoa2').val(t_noa);
-	                
+                q_getFormat();
+                q_langShow();
+                $('#txtDate1').mask('999/99/99');
+                $('#txtDate1').datepicker();
+                $('#txtDate2').mask('999/99/99');
+                $('#txtDate2').datepicker();
+                var t_key = q_getHref();
+                if(t_key[1] != undefined){
+                	$('#txtXnoa1').val(t_key[1]);
+                	$('#txtXnoa2').val(t_key[1]);
+                }
             }
 
             function q_boxClose(s2) {
             }
+
             function q_gtPost(s2) {
             }
 		</script>
-		<style type="text/css">
-			#frameReport table{
-					border-collapse: collapse;
-				}
-		</style>
 	</head>
-	<body ondragstart="return false" draggable="false"
+	<body id="z_accc" ondragstart="return false" draggable="false"
 	ondragenter="event.dataTransfer.dropEffect='none'; event.stopPropagation(); event.preventDefault();"
 	ondragover="event.dataTransfer.dropEffect='none';event.stopPropagation(); event.preventDefault();"
 	ondrop="event.dataTransfer.dropEffect='none';event.stopPropagation(); event.preventDefault();">
@@ -75,5 +72,3 @@
 		</div>
 	</body>
 </html>
-           
-          

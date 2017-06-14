@@ -14,47 +14,53 @@
 		<script src="css/jquery/ui/jquery.ui.core.js"> </script>
 		<script src="css/jquery/ui/jquery.ui.widget.js"> </script>
 		<script src="css/jquery/ui/jquery.ui.datepicker_tw.js"> </script>
+		
 		<script type="text/javascript">
-             
             $(document).ready(function() {
-            	q_getId();
-                q_gf('', 'z_quatp_gu');
-               
+                _q_boxClose();
+                q_getId();
+                q_gf('', 'z_vcc_ps');
             });
             function q_gfPost() {
                 $('#q_report').q_report({
-                    fileName : 'z_quatp_gu',
-                    options : [ {
-                        type : '6',
-                        name : 'xnoa'
-                    },{
-                        type : '0',
-                        name : 'http',
-                        value:location.host
+                    fileName : 'z_vcc_ps',
+                    options : [{//[1]
+						type : '0',
+						name : 'accy',
+                        value : q_getId()[4] 
+                    },{//  [2][3]
+                        type : '1',
+                        name : 'date'
                     }]
                 });
                 q_popAssign();
-                
-                if(q_getHref()[1]!=undefined)
-                	$('#txtXnoa').val(q_getHref()[1]);
-	        }
+                q_getFormat();
+                q_langShow();
+                $('#txtDate1').mask(r_picd);
+                $('#txtDate1').datepicker();
+                $('#txtDate2').mask(r_picd);
+                $('#txtDate2').datepicker();
 
+				$('#txtDate1').val(q_date().substr(0,r_lenm)+'/01');
+				$('#txtDate2').val(q_cdn(q_cdn(q_date().substr(0,r_lenm)+'/01',45).substr(0,r_lenm)+'/01',-1));
+                var t_key = q_getHref();
+                if(t_key[1] != undefined){
+                	$('#txtXnoa1').val(t_key[1]);
+                	$('#txtXnoa2').val(t_key[1]);
+                }
+            }
             function q_boxClose(s2) {
             }
             function q_gtPost(s2) {
             }
-	</script>
-	<style type="text/css">
-		#frameReport table{
-			border-collapse: collapse;
-		}
-	</style>
+		</script>
+		
+		
 	</head>
-	<body ondragstart="return false" draggable="false"
-        ondragenter="event.dataTransfer.dropEffect='none'; event.stopPropagation(); event.preventDefault();"  
-        ondragover="event.dataTransfer.dropEffect='none';event.stopPropagation(); event.preventDefault();"  
-        ondrop="event.dataTransfer.dropEffect='none';event.stopPropagation(); event.preventDefault();"
-     >
+	<body id="z_accc" ondragstart="return false" draggable="false"
+	ondragenter="event.dataTransfer.dropEffect='none'; event.stopPropagation(); event.preventDefault();"
+	ondragover="event.dataTransfer.dropEffect='none';event.stopPropagation(); event.preventDefault();"
+	ondrop="event.dataTransfer.dropEffect='none';event.stopPropagation(); event.preventDefault();">
 		<div id="q_menu"> </div>
 		<div style="position: absolute;top: 10px;left:50px;z-index: 1;width:2000px;">
 			<div id="container">

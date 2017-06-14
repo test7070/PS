@@ -18,35 +18,35 @@
             $(document).ready(function() {
                 _q_boxClose();
                 q_getId();
-                q_gf('', 'z_invop_gu');
+                q_gf('', 'z_cutp_ps');
             });
             function q_gfPost() {
                 $('#q_report').q_report({
-                    fileName : 'z_invop_gu',
-                    options : [{/*1-1 [1]*/
+                    fileName : 'z_cutp_ps',
+                    options : [{//[1]
 						type : '0',
 						name : 'accy',
                         value : q_getId()[4] 
-                    },{/*[2]*/
-                        type : '0',
-                        name : 'xhttp',
-                        value:location.host
-                    },{/*1-2 [3]*/
-                        type : '6',
+                    },{//1  [2][3]
+                        type : '1',
                         name : 'xnoa'
                     }]
                 });
                 q_popAssign();
                 q_getFormat();
                 q_langShow();
+                $('#txtDate1').mask('999/99/99');
+                $('#txtDate1').datepicker();
+                $('#txtDate2').mask('999/99/99');
+                $('#txtDate2').datepicker();
                 var t_key = q_getHref();
-                if(t_key != undefined)
-                	$('#txtXnoa').val(t_key[1]);
+                if(t_key[1] != undefined){
+                	$('#txtXnoa1').val(t_key[1]);
+                	$('#txtXnoa2').val(t_key[1]);
+                }
             }
-
             function q_boxClose(s2) {
             }
-
             function q_gtPost(s2) {
             }
 		</script>
