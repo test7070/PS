@@ -50,7 +50,6 @@
                 bbmKey = ['noa'];
                 bbsKey = ['noa', 'no2'];
                 bbtKey = ['noa', 'no2'];
-				
                 q_brwCount();
                 // 計算 合適  brwCount
                 q_gt('style', '', 0, 0, 0, '');
