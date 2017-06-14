@@ -1479,10 +1479,10 @@
                 <tr style='color:white; background:#003366;'>
                     <td  align="center" style="width:30px;"><input class="btn"  id="btnPlus" type="button" value='+' style="font-weight: bold;"/></td>
                     <td align="center" style="width:30px;"><a id='lblNo2' style="text-align:center;"> </a></td>
-                    <td align="center" style="width:90px;"><a id='lblProductno'></a><br><a id='lblStyle_st'></a>｜<a id='lblClasss'></a></td>
+                    <td align="center" style="width:90px;"> <a id='lblProductno'> </a><br><a id='lblStyle_st'> </a>｜<a id='lblClasss'> </a> </td>
                     <td align="center" style="width:120px;"><a id='lblProduct_s'> </a></td>
                     <td align="center" id='Size'><a id='lblSize_help'> </a><BR><a id='lblSize_st'> </a></td>
-					<td align="center" style="width:50px;"><a id='lblWidth_t'></a>2</td>
+					<td align="center" style="width:50px;"><a id='lblWidth_t'> </a>2</td>
 					<td align="center" style="width:50px;"><a>寬度3</a></td>
                     <td align="center" style="width:120px;"><a id='lblSizea_st'> </a></td>
                     <td align="center" style="width:50px;"><a id='lblUnit'> </a></td>
@@ -1491,7 +1491,7 @@
                     <td align="center" style="width:120px;"><a id='lblPrices'> </a><br><a id='lblTotals'> </a></td>
                     <td align="center" style="width:120px;"><a id='lblDateas'> </a></td>
                     <td align="center" style="width:40px;"><a id='lblEnda_st'> </a></td>
-                    <td align="center" style="width:250px;"><a id='lblMemo_s'></a><br>爐號</td>
+                    <td align="center" style="width:250px;"><a id='lblMemo_s'> </a><br>爐號</td>
                 </tr>
                 <tr style='background:#cad3ff;'>
                     <td align="center"><input class="btn"  id="btnMinus.*" type="button" value='-' style=" font-weight: bold;"/></td>
