@@ -25,7 +25,7 @@
 			var q_readonlys = ['txtC1', 'txtNotv', 'txtNo3', 'txtOrdbno', 'txtNo2'];
 			var q_readonlyt = [];
 			var bbmNum = [['txtMoney', 10, 0, 1], ['txtTax', 10, 0, 1], ['txtTotal', 10, 0, 1], ['txtTotalus', 10, 2, 1], ['txtWeight', 10, 3, 1], ['txtFloata', 10, 4, 1]];
-			var bbsNum = [['txtPrice', 15, 3, 1], ['txtTotal', 12, 2, 1, 1], ['txtWeight', 10, 3, 1], ['txtMount', 10, 2, 1], ['txtTheory', 10, 3, 1], ['textSize1', 10, 3, 1], ['textSize2', 10, 2, 1], ['textSize3', 10, 3, 1], ['textSize4', 10, 2, 1]];
+			var bbsNum = [['txtPrice', 15, 3, 1], ['txtTotal', 12, 2, 1, 1], ['txtWeight', 10, 3, 1], ['txtMount', 10, 2, 1], ['txtTheory', 10, 3, 1], ['txtOmount', 10, 3, 1], ['textSize1', 10, 3, 1], ['textSize2', 10, 2, 1], ['textSize3', 10, 3, 1], ['textSize4', 10, 2, 1], ['textSize5', 10, 2, 1]];
 			var bbtNum = [['txtWeight', 10, 3, 1]];
 			var bbmMask = [];
 			var bbsMask = [];
@@ -90,7 +90,7 @@
                     q_tr('txtLengthb_' + j, q_float('textSize3_' + j));
                     q_tr('txtRadius_' + j, q_float('textSize4_' + j));
                     q_tr('txtLengthc_' + j, q_float('textSize5_' + j));
-					
+					$('#txtTheory_' + j).val(getTheory(j)); 
 				}
 				t_taxrate = parseFloat(q_getPara('sys.taxrate')) / 100;
 				switch ($('#cmbTaxtype').val()) {
@@ -565,48 +565,15 @@
 							$('#textSize1_' + n).val('');
 							$('#textSize2_' + n).val('');
 							$('#textSize3_' + n).val('');
-							$('#textSize4_' + n).val('');
-							if ($('#cmbKind').val() == 'A1') {//鋼捲鋼板
-								if (!(data.length == 2 || data.length == 3)) {
-									alert(q_getPara('transize.error01'));
-									return;
-								}
-								$('#textSize1_' + n).val((data[0] != undefined ? (data[0].toString().length > 0 ? (isNaN(parseFloat(data[0])) ? 0 : parseFloat(data[0])) : 0) : 0));
-								$('#textSize2_' + n).val((data[1] != undefined ? (data[1].toString().length > 0 ? (isNaN(parseFloat(data[1])) ? 0 : parseFloat(data[1])) : 0) : 0));
-								$('#textSize3_' + n).val((data[2] != undefined ? (data[2].toString().length > 0 ? (isNaN(parseFloat(data[2])) ? 0 : parseFloat(data[2])) : 0) : 0));
-								sum();
-							} else if ($('#cmbKind').val() == 'A4') {//鋼胚
-								if (!(data.length == 2 || data.length == 3)) {
-									alert(q_getPara('transize.error04'));
-									return;
-								}
-								$('#textSize1_' + n).val((data[0] != undefined ? (data[0].toString().length > 0 ? (isNaN(parseFloat(data[0])) ? 0 : parseFloat(data[0])) : 0) : 0));
-								$('#textSize2_' + n).val((data[1] != undefined ? (data[1].toString().length > 0 ? (isNaN(parseFloat(data[1])) ? 0 : parseFloat(data[1])) : 0) : 0));
-								$('#textSize3_' + n).val((data[2] != undefined ? (data[2].toString().length > 0 ? (isNaN(parseFloat(data[2])) ? 0 : parseFloat(data[2])) : 0) : 0));
-							} else if ($('#cmbKind').val() == 'B2') {//鋼管
-								if (!(data.length == 3 || data.length == 4)) {
-									alert(q_getPara('transize.error02'));
-									return;
-								}
-								if (data.length == 3) {
-									$('#textSize1_' + n).val((data[0] != undefined ? (data[0].toString().length > 0 ? (isNaN(parseFloat(data[0])) ? 0 : parseFloat(data[0])) : 0) : 0));
-									$('#textSize3_' + n).val((data[1] != undefined ? (data[1].toString().length > 0 ? (isNaN(parseFloat(data[1])) ? 0 : parseFloat(data[1])) : 0) : 0));
-									$('#textSize4_' + n).val((data[2] != undefined ? (data[2].toString().length > 0 ? (isNaN(parseFloat(data[2])) ? 0 : parseFloat(data[2])) : 0) : 0));
-								} else {
-									$('#textSize1_' + n).val((data[0] != undefined ? (data[0].toString().length > 0 ? (isNaN(parseFloat(data[0])) ? 0 : parseFloat(data[0])) : 0) : 0));
-									$('#textSize2_' + n).val((data[1] != undefined ? (data[1].toString().length > 0 ? (isNaN(parseFloat(data[1])) ? 0 : parseFloat(data[1])) : 0) : 0));
-									$('#textSize3_' + n).val((data[2] != undefined ? (data[2].toString().length > 0 ? (isNaN(parseFloat(data[2])) ? 0 : parseFloat(data[2])) : 0) : 0));
-									$('#textSize4_' + n).val((data[3] != undefined ? (data[3].toString().length > 0 ? (isNaN(parseFloat(data[3])) ? 0 : parseFloat(data[3])) : 0) : 0));
-								}
-							} else if ($('#cmbKind').val() == 'C3') {//鋼筋
-								if (data.length != 1) {
-									alert(q_getPara('transize.error03'));
-									return;
-								}
-								$('#textSize1_' + n).val((data[0] != undefined ? (data[0].toString().length > 0 ? (isNaN(parseFloat(data[0])) ? 0 : parseFloat(data[0])) : 0) : 0));
-							} else {
-								//nothing
+							$('#textSize4_' + n).val('');					
+							if (!(data.length == 2 || data.length == 3)) {
+								alert(q_getPara('transize.error01'));
+								return;
 							}
+							$('#textSize1_' + n).val((data[0] != undefined ? (data[0].toString().length > 0 ? (isNaN(parseFloat(data[0])) ? 0 : parseFloat(data[0])) : 0) : 0));
+							$('#textSize2_' + n).val((data[1] != undefined ? (data[1].toString().length > 0 ? (isNaN(parseFloat(data[1])) ? 0 : parseFloat(data[1])) : 0) : 0));
+							$('#textSize3_' + n).val((data[2] != undefined ? (data[2].toString().length > 0 ? (isNaN(parseFloat(data[2])) ? 0 : parseFloat(data[2])) : 0) : 0));
+							$('#textSize4_' + n).val((data[2] != undefined ? (data[3].toString().length > 0 ? (isNaN(parseFloat(data[3])) ? 0 : parseFloat(data[3])) : 0) : 0));
 							sum();
 						});
 						$('#btnOrdcrecord_' + j).click(function() {
@@ -1190,6 +1157,7 @@
 						<a id='lblTotal_st'> </a><br>
 						<a class="st" id='lblTheory_st'> </a>
 					</td>
+					<td align="center" style="width:70px;"><a id='lblOmount_ps'>折數</a></td>
 					<td align="center" style="width:80px;">
 						<a id='lblC1_st'> </a><br>
 						<a id='lblNotv_st'> </a>
@@ -1199,7 +1167,7 @@
 						<a id='lblOrdenos_st'> </a>
 					</td>
 					<td align="center" style="width:80px;display: none;" class="source"><a id='lblSource_st'> </a></td>
-					<td align="center" style="width:250px;"><a id='lblUno_st'> </a></td>
+					<td align="center" style="width:150px;"><a id='lblUno_ps'>爐號</a></td>
 					<td align="center" style="width:30px;"><a id='lblEnda_st'> </a></td>
 					<td align="center" style="width:40px;"><a id='lblOrdcrecord'> </a></td>
 				</tr>
@@ -1260,6 +1228,7 @@
 						<input id="txtTotal.*" type="text" class="txt num" style="width:97%;"/>
 						<input id="txtTheory.*" type="text" class="txt num st" style="width:97%;"/>
 					</td>
+					<td><input id="txtOmount.*" type="text"  class="txt num" style="width:95%;"/></td>
 					<td>
 						<input id="txtC1.*" type="text" class="txt num" style="width:97%;"/>
 						<input id="txtNotv.*" type="text" class="txt num" style="width:97%;"/>
