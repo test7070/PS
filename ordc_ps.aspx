@@ -25,7 +25,7 @@
 			var q_readonlys = ['txtC1', 'txtNotv', 'txtNo3', 'txtOrdbno', 'txtNo2'];
 			var q_readonlyt = [];
 			var bbmNum = [['txtMoney', 10, 0, 1], ['txtTax', 10, 0, 1], ['txtTotal', 10, 0, 1], ['txtTotalus', 10, 2, 1], ['txtWeight', 10, 3, 1], ['txtFloata', 10, 4, 1]];
-			var bbsNum = [['txtPrice', 15, 3, 1], ['txtTotal', 12, 2, 1, 1], ['txtWeight', 10, 3, 1], ['txtMount', 10, 2, 1], ['txtTheory', 10, 3, 1], ['txtOmount', 10, 3, 1], ['textSize1', 10, 3, 1], ['textSize2', 10, 2, 1], ['textSize3', 10, 3, 1], ['textSize4', 10, 2, 1], ['textSize5', 10, 2, 1]];
+			var bbsNum = [['txtPrice', 15, 3, 1], ['txtTotal', 10, 0, 1], ['txtWeight', 10, 1, 1], ['txtMount', 10, 0, 1], ['txtTheory', 10, 1, 1], ['txtOmount', 10, 3, 1], ['textSize1', 10, 2, 1], ['textSize2', 10, 1, 1], ['textSize3', 10, 1, 1], ['textSize4', 10, 1, 1], ['textSize5', 10, 1, 1]];
 			var bbtNum = [['txtWeight', 10, 3, 1]];
 			var bbmMask = [];
 			var bbsMask = [];
@@ -42,7 +42,7 @@
 				, ['txtStyle_', 'btnStyle_', 'style', 'noa,product', 'txtStyle_', 'style_b.aspx']
 				,['txtSalesno', 'lblSales', 'sss', 'noa,namea', 'txtSalesno,txtSales', 'sss_b.aspx'], 
 				['txtCno', 'lblAcomp', 'acomp', 'noa,acomp', 'txtCno,txtAcomp', 'acomp_b.aspx'], 
-				['txtUno_', 'btnUno_', 'view_uccc', 'uno', 'txtUno_', 'uccc_seek_b.aspx?;;;1=0', '95%', '60%'], 
+				['txtUno_', 'btnUno_', 'view_uccc', 'uno', '0txtUno_', 'uccc_seek_b.aspx?;;;1=0', '95%', '60%'], 
 				['txtAddr', '', 'view_road', 'memo,zipcode', '0txtAddr,txtPost', 'road_b.aspx'], 
 				['txtAddr2', '', 'view_road', 'memo,zipcode', '0txtAddr2,txtPost2', 'road_b.aspx'], 
 				['txtSpec_', '', 'spec', 'noa,product', '0txtSpec_,txtSpec_', 'spec_b.aspx', '95%', '95%'], 
@@ -85,12 +85,41 @@
 				var t_kind = (($('#cmbKind').val()) ? $('#cmbKind').val() : '');
 				t_kind = t_kind.substr(0, 1);
 				for (var j = 0; j < q_bbsCount; j++) {
+				    t_unit = $.trim($('#txtUnit_' + j).val()).toUpperCase();
+				    var t_product = $.trim($('#txtProduct_' + j).val());
+                    if (t_unit.length == 0 && t_product.length > 0) {
+                        if (t_product.indexOf('管') > 0)
+                            t_unit = '支';
+                        else
+                            t_unit = 'KG';
+                        $('#txtUnit_' + j).val(t_unit);
+                    }
+
 				    q_tr('txtDime_' + j, q_float('textSize1_' + j));
                     q_tr('txtWidth_' + j, q_float('textSize2_' + j));
                     q_tr('txtLengthb_' + j, q_float('textSize3_' + j));
                     q_tr('txtRadius_' + j, q_float('textSize4_' + j));
                     q_tr('txtLengthc_' + j, q_float('textSize5_' + j));
-					$('#txtTheory_' + j).val(getTheory(j)); 
+					$('#txtTheory_' + j).val(getTheory(j));
+					t_weights = q_float('txtWeight_' + j);
+                    t_prices = q_float('txtPrice_' + j);
+                    t_mounts = q_float('txtMount_' + j);
+                    t_counta = (q_float('txtOmount_' + j) ? q_div(q_float('txtOmount_' + j),100): 1);
+                    if (t_weights.length!=0) {
+                        t_moneys = q_mul(q_mul(t_prices, t_weights),t_counta);
+                    } else {
+                        t_moneys = q_mul(q_mul(t_prices, t_mounts),t_counta);
+                    }
+                    if (t_float == 0) {
+                        t_moneys = round(t_moneys, 0);
+                    } else {
+                        t_moneyus = q_add(t_moneyus, round(t_moneys, 2));
+                        t_moneys = round(q_mul(t_moneys, t_float), 0);
+                    }
+                    t_weight = q_add(t_weight, t_weights);
+                    t_mount = q_add(t_mount, t_mounts);
+                    t_money = q_add(t_money, t_moneys);
+                    $('#txtTotal_' + j).val(FormatNumber(t_moneys));
 				}
 				t_taxrate = parseFloat(q_getPara('sys.taxrate')) / 100;
 				switch ($('#cmbTaxtype').val()) {
@@ -205,8 +234,7 @@
 						return;
 					}
 					q_box('ordbsst_b.aspx', 'ordbs;' + t_where, "95%", "650px", q_getMsg('popOrdbs'));
-				});
-				
+				});	
 			}
 
 			function distinct(arr1) {
@@ -488,6 +516,8 @@
 				t_Width = $('#txtWidth_' + b_seq).val();
 				t_Dime = $('#txtDime_' + b_seq).val();
 				t_Lengthb = $('#txtLengthb_' + b_seq).val();
+				t_Lengthc = $('#txtLengthc_' + b_seq).val();
+				t_Project = q_getPara('sys.project').toUpperCase();
 				t_Mount = $('#txtMount_' + b_seq).val();
 				t_Style = $('#txtStyle_' + b_seq).val();
 				t_Productno = $('#txtProductno_' + b_seq).val();
@@ -498,6 +528,8 @@
 					width : t_Width,
 					dime : t_Dime,
 					lengthb : t_Lengthb,
+					lengthc : t_Lengthc,
+					project : t_Project,
 					mount : t_Mount,
 					style : t_Style,
 					productno : t_Productno,
@@ -525,6 +557,9 @@
 						$('#txtC1_' + j).change(function() {
 							sum();
 						});
+						$('#txtOmount_' + j).change(function() {
+                            sum();
+                        });
 						$('#txtStyle_' + j).bind('contextmenu', function(e) {
                             /*滑鼠右鍵*/
                             e.preventDefault();
@@ -556,6 +591,12 @@
 						$('#textSize4_' + j).change(function() {
 							sum();
 						});
+						$('#textSize5_' + j).change(function() {
+                            sum();
+                        });
+                        $('#txtOmount_' + j).change(function() {
+                            sum();
+                        });
 						$('#txtSize_' + j).change(function(e) {
 							if ($.trim($(this).val()).length == 0)
 								return;
@@ -565,7 +606,8 @@
 							$('#textSize1_' + n).val('');
 							$('#textSize2_' + n).val('');
 							$('#textSize3_' + n).val('');
-							$('#textSize4_' + n).val('');					
+							$('#textSize4_' + n).val('');
+							$('#textSize5_' + n).val('');				
 							if (!(data.length == 2 || data.length == 3)) {
 								alert(q_getPara('transize.error01'));
 								return;
@@ -573,7 +615,8 @@
 							$('#textSize1_' + n).val((data[0] != undefined ? (data[0].toString().length > 0 ? (isNaN(parseFloat(data[0])) ? 0 : parseFloat(data[0])) : 0) : 0));
 							$('#textSize2_' + n).val((data[1] != undefined ? (data[1].toString().length > 0 ? (isNaN(parseFloat(data[1])) ? 0 : parseFloat(data[1])) : 0) : 0));
 							$('#textSize3_' + n).val((data[2] != undefined ? (data[2].toString().length > 0 ? (isNaN(parseFloat(data[2])) ? 0 : parseFloat(data[2])) : 0) : 0));
-							$('#textSize4_' + n).val((data[2] != undefined ? (data[3].toString().length > 0 ? (isNaN(parseFloat(data[3])) ? 0 : parseFloat(data[3])) : 0) : 0));
+							$('#textSize4_' + n).val((data[3] != undefined ? (data[3].toString().length > 0 ? (isNaN(parseFloat(data[3])) ? 0 : parseFloat(data[3])) : 0) : 0));
+							$('#textSize5_' + n).val((data[4] != undefined ? (data[4].toString().length > 0 ? (isNaN(parseFloat(data[4])) ? 0 : parseFloat(data[4])) : 0) : 0));
 							sum();
 						});
 						$('#btnOrdcrecord_' + j).click(function() {
@@ -683,6 +726,8 @@
 				as['kind'] = abbm2['kind'];
 				as['tggno'] = abbm2['tggno'];
 				as['odate'] = abbm2['odate'];
+				as['enda'] = abbm2['enda'];
+				as['cancel'] = abbm2['cancel'];
 
 				return true;
 			}
@@ -1100,6 +1145,10 @@
 						</td>
 						<td class="st"><span> </span><a id='lblWeight' class="lbl"> </a></td>
 						<td class="st"><input id="txtWeight"  type="text" class="txt num c1"/></td>
+						<td>
+                            <a id='lblEnd' class="lbl" style="float:right;"> </a><span> </span>
+                            <input id="chkEnda" type="checkbox" style="float:right;"/>
+                        </td>
 					</tr>
 					<tr>
 						<td><span> </span><a id='lblMoney' class="lbl"> </a></td>
@@ -1113,9 +1162,9 @@
 						<td><span> </span><a id='lblTotal' class="lbl"> </a></td>
 						<td><input id="txtTotal" type="text" class="txt num c1" /></td>
 						<td>
-							<a id='lblEnd' class="lbl" style="float:right;"> </a><span> </span>
-							<input id="chkEnda" type="checkbox" style="float:right;"/>
-						</td>
+                            <a id='lblCancel' class="lbl" style="float:right;"> </a><span> </span>
+                            <input id="chkCancel" type="checkbox" style="float:right;"/>
+                        </td>
 					</tr>
 					<tr>
 						<td><span> </span><a id='lblMemo' class="lbl"> </a></td>
@@ -1142,11 +1191,10 @@
 					<td align="center" style="width:80px;"><a>序</a></td>
 					<td align="center" style="width:120px;"><a>品號<BR>品名</a></td>
 					<td class="st hide01" align="center" style="width:30px;"><a id='lblStyle_st'> </a></td>
-					<td class="st hide01" align="center" style="width:100px;"><a>鋼廠</a></td>
+					<td class="st hide01" align="center" style="width:100px;"><a>鋼廠</a><BR><a id='lblSize_ps'>板面</a></td>
 					<td align="center" style="width:140px;display:none;" class="pk">規範<BR>國別</td>
-					<td class="st hide01" align="center" style="width:330px;" id='Size'>
-						<a id='lblSize_help'>厚度 x 寬度/OD x 長度/ID x 寬度2 x 寬度3 </a><BR>
-						<a id='lblSize_ps'>板面</a>
+					<td class="st hide01" align="center" style="width:350px;" id='Size'>
+						<a id='lblSize_help'>厚度 x 寬度/OD x 長度/ID x 寬度2 x 寬度3 </a>
 					</td>
 					<td align="center" style="width:80px;"><a id='lblMount_st'> </a></td>
 					<td align="center" style="width:50px;display:none;" class="pk"><a>數量<br>單位</a></td>
@@ -1162,13 +1210,12 @@
 						<a id='lblC1_st'> </a><br>
 						<a id='lblNotv_st'> </a>
 					</td>
-					<td align="center" style="width:180px;">
-						<a id='lblMemos_st'> </a><br>
-						<a id='lblOrdenos_st'> </a>
-					</td>
-					<td align="center" style="width:80px;display: none;" class="source"><a id='lblSource_st'> </a></td>
 					<td align="center" style="width:150px;"><a id='lblUno_ps'>爐號</a></td>
+					<td align="center" style="width:180px;">
+                        <a id='lblMemos_st'> </a>
+                    </td>
 					<td align="center" style="width:30px;"><a id='lblEnda_st'> </a></td>
+					<td align="center" style="width:30px;"><a id='lblCancel_st'>取消</a></td>
 					<td align="center" style="width:40px;"><a id='lblOrdcrecord'> </a></td>
 				</tr>
 				<tr style='background:#cad3ff;'>
@@ -1188,6 +1235,7 @@
 					</td>
 					<td class="st hide01">
 						<input id="txtSource.*" type="text" style='width: 95%;'/>
+						<input id="txtSpec.*" type="text" style="float:left;width:98%;"/>
 					</td>
 					<td style="display:none;" class="pk">
                         <input id="txtUcolor.*" type="text" style="width:95%;"/>
@@ -1217,7 +1265,6 @@
 						<input id="txtDime.*" type="text" style="display:none;"/>
 						<input id="txtLengthb.*" type="text" style="display:none;"/>
 						<input id="txtLengthc.*" type="text" style="display:none;"/>
-						<input id="txtSpec.*" type="text" style="float:left;width:98%;"/>
 					</td>
 					<td><input id="txtMount.*" type="text" class="txt num" style="width:95%;"/></td>
 					<td style="display:none;" class="pk"><input id="txtUnit2.*" type="text" style="width:95%;"/></td>
@@ -1233,17 +1280,17 @@
 						<input id="txtC1.*" type="text" class="txt num" style="width:97%;"/>
 						<input id="txtNotv.*" type="text" class="txt num" style="width:97%;"/>
 					</td>
-					<td >
-						<input id="txtMemo.*" type="text" style="width:97%; float:left;"/>
-						<input id="txtOrdbno.*" type="text"  style="width:70%;float:left;"/>
-						<input id="txtNo3.*" type="text"  style="width:20%;float:left;"/>
-					</td>
-					<td class="source" style="display: none;"><input id="txtSource.*" type="text"  class="txt" style="width:95%;"/></td>
 					<td>
 						<input id="btnUno.*" type="button" value='.' style="float:left;width:1%;"/>
 						<input id="txtUno.*" type="text" style="float:left;width:85%;" />
 					</td>
+					<td >
+                        <input id="txtMemo.*" type="text" style="width:97%; float:left;"/>
+                        <!--<input id="txtOrdbno.*" type="text"  style="width:70%;float:left;"/>
+                        <input id="txtNo3.*" type="text"  style="width:20%;float:left;"/>-->
+                    </td>
 					<td><input id="chkEnda.*" type="checkbox"/></td>
+					<td><input id="chkCancel.*" type="checkbox"/></td>
 					<td><input class="btn"  id="btnOrdcrecord.*" type="button" value='.' style=" font-weight: bold;" />	</td>
 				</tr>
 			</table>
