@@ -51,10 +51,8 @@
                 bbsKey = ['noa', 'no2'];
                 bbtKey = ['noa', 'no2'];
                 q_brwCount();
-                // 計算 合適  brwCount
                 q_gt('style', '', 0, 0, 0, '');
                 q_gt(q_name, q_content, q_sqlCount, 1, 0, '', r_accy);
-                // q_sqlCount=最前面 top=筆數， q_init 為載入 q_sys.xml 與 q_LIST
                 $('#txtOdate').focus();
                 OrdenoAndNo2On_Change();
                 
@@ -423,23 +421,7 @@
                             $('#' + focus_addr).val(as[0].addr_fact);
                             focus_addr = '';
                         }
-                        break;
-                    /*case 'quat':
-                        var as = _q_appendData("quat", "", true);
-                        if (as[0] != undefined) {
-                            (trim($('#txtTel').val())==''?$('#txtTel').val(as[0].tel):'');
-                            (trim($('#txtFax').val())==''?$('#txtFax').val(as[0].fax):'');
-                            (trim($('#txtPost').val())==''?$('#txtPost').val(as[0].post):'');
-                            (trim($('#txtAddr').val())==''?$('#txtAddr').val(as[0].addr):'');
-                            (trim($('#txtPost2').val())==''?$('#txtPost2').val(as[0].post2):'');
-                            (trim($('#txtAddr2').val())==''?$('#txtAddr2').val(as[0].addr2):'');
-                            (trim($('#txtSalesno').val())==''?$('#txtSalesno').val(as[0].salesno):'');
-                            (trim($('#txtSales').val())==''?$('#txtSales').val(as[0].sales):'');
-                            (trim($('#txtPaytype').val())==''?$('#txtPaytype').val(as[0].paytype):'');
-                            $('#cmbTrantype').val(as[0].trantype);
-                            (trim($('#txtFloata').val())==''?$('#txtFloata').val(as[0].floata):'');
-                            $('#cmbCoin').val(as[0].coin);
-                        }*/                       
+                        break;                      
                     case q_name:
                         t_uccArray = _q_appendData("ucc", "", true);
                         if (q_cur == 4)// 查詢
@@ -474,37 +456,6 @@
                 }
                 return uniArray;
             }
-            /*function btnQuat() {
-                var t_custno = trim($('#txtCustno').val());
-                var t_where = '1=1 ';
-                if (t_custno.length > 0) {
-                    t_where += (t_custno.length > 0 ? q_sqlPara2("custno", t_custno) : "");
-                    ////  sql AND 語法，請用 &&
-                    t_where = t_where;
-                } else {
-                    alert(q_getMsg('msgCustEmp'));
-                    return;
-                }
-                var distinctArray = new Array;
-                var inStr = '';
-                var t_noa = $('#txtNoa').val();
-                for(var i=0;i<abbs.length;i++){
-                    if(abbs[i].noa == t_noa)
-                        distinctArray.push(abbs[i].quatno+abbs[i].no3);
-                }
-                distinctArray = distinct(distinctArray);
-                for(var i=0;i<distinctArray.length;i++){
-                    if(trim(distinctArray[i]) != '')
-                        inStr += "'"+distinctArray[i]+"',";
-                }
-                inStr = inStr.substring(0,inStr.length-1);
-                if (q_getPara('sys.project').toUpperCase()=="RS"){//祥興報價重量數量會為0
-                	t_where += " and kind='" +$('#cmbKind').val()+ "' and (((enda='0') and (notv > 0 or notv = 0))"+(trim(inStr).length>0?" or noa+no3 in("+inStr+") ":'')+")";
-                }else{
-                	t_where += " and kind='" +$('#cmbKind').val()+ "' and (((enda='0') and (notv > 0))"+(trim(inStr).length>0?" or noa+no3 in("+inStr+") ":'')+")";
-                }
-                q_box("quatst_b.aspx?" + r_userno + ";" + r_name + ";" + q_time + ";" + t_where + ";" + r_accy, 'quats', "95%", "95%", q_getMsg('popQuats'));
-            }*/
             
             function coin_chg() {
 				var t_where = "where=^^ ('" + $('#txtDatea').val() + "' between bdate and edate) and coin='"+$('#cmbCoin').find("option:selected").text()+"' ^^";
@@ -520,35 +471,9 @@
                     Unlock(1);
                     return;
                 }
-                /*for(var i=0;i<q_bbsCount;i++){
-                    if(q_float('txtMount_'+i)!=0 && !$('#chkSale_'+i).prop('checked') && !$('#chkIscut_'+i).prop('checked')){
-                        $('#chkCut_'+i).prop('checked',true);
-                    }
-                    getTheory(i);
-                }*/
+                
                 var t_chk;
-                /*for(var i=0;i<q_bbtCount;i++){
-                    if($.trim($('#txtUno__'+i).val()).length>0){
-                        if($.trim($('#txtNo3__'+i).val()).length==0){
-                            alert('請輸入訂序');
-                            Unlock(1);
-                            return;
-                        }else{
-                            t_chk = false;
-                            for(var j=0;j<q_bbsCount;j++){
-                                if($.trim($('#txtNo3__'+i).val())==$.trim($('#txtNo2_'+j).val())){
-                                    t_chk = true;
-                                    break;
-                                }
-                            }
-                            if(!t_chk){
-                                alert('【'+$.trim($('#txtNo3__'+i).val())+'】訂序異常');
-                                Unlock(1);
-                                return;
-                            }
-                        }
-                    }
-                }*/
+                
                 if (q_cur == 1)
                     $('#txtWorker').val(r_name);
                 else
@@ -736,27 +661,11 @@
                 }
             }
             function bbsAssign() {/// 表身運算式
-                /*$('input[id*="btnOrdet_"]').each(function(){
-                    $(this).val($('#lblOrdet_st').text());
-                });*/
-                var maxNo2 = 0;
-                var tmpNo2 = 0;
-                try{
-                    for (var j = 0; j < q_bbsCount; j++) {
-                        tmpNo2 = parseInt($.trim($('#txtNo2_'+j).val()).length==0 ?"0":$.trim($('#txtNo2_'+j).val()));
-                        maxNo2 = tmpNo2>maxNo2?tmpNo2:maxNo2;
-                    }
-                }catch(e){
-                    alert('訂序異常。');
-                }
                 for (var j = 0; j < q_bbsCount; j++) {
                     $('#lblNo_' + j).text(j + 1); 
-					
-                    if($('#txtNo2_'+j).val().length==0){
-                        maxNo2++;
-                        tmpNo2 = ('00'+maxNo2).substring(('00'+maxNo2).length-3,('00'+maxNo2).length);
-                        $('#txtNo2_'+j).val(tmpNo2);
-                    }
+
+                    $('#txtNo2_'+j).val($('#txtNoq_'+j).val());
+                    
                     if (!$('#btnMinus_' + j).hasClass('isAssign')) {
 					
 						$('#txtProductno_' + i).bind('contextmenu', function(e) {
@@ -983,39 +892,7 @@
             }
             
             function OrdenoAndNo2On_Change(){
-            	var thissyle = trim($('#cmbKind').val());
-                for(var idno=0;idno<q_bbsCount;idno++){
-                    //var thisNo3 = trim($('#txtNo3_'+idno).val());
-                    /*if(thisNo3.length > 0){
-                        $('#textSize1_'+idno).attr('readonly', true).css('background-color', 'rgb(237,237,238)').css('color', 'green');
-                        $('#textSize2_'+idno).attr('readonly', true).css('background-color', 'rgb(237,237,238)').css('color', 'green');
-                        if (q_getPara('sys.project').toUpperCase()!="RS" || thissyle=='B2'){
-                       		$('#textSize3_'+idno).attr('readonly', true).css('background-color', 'rgb(237,237,238)').css('color', 'green');
-                       	}
-                       	if (q_getPara('sys.project').toUpperCase()!="RS"){
-                       		$('#textSize4_'+idno).attr('readonly', true).css('background-color', 'rgb(237,237,238)').css('color', 'green');
-                       	}
-                        $('#txtRadius_'+idno).attr('readonly', true).css('background-color', 'rgb(237,237,238)').css('color', 'green');
-                        $('#textWidth_'+idno).attr('readonly', true).css('background-color', 'rgb(237,237,238)').css('color', 'green');
-                        $('#textDime_'+idno).attr('readonly', true).css('background-color', 'rgb(237,237,238)').css('color', 'green');
-                        $('#textLengthb_'+idno).attr('readonly', true).css('background-color', 'rgb(237,237,238)').css('color', 'green');
-                        $('#txtProduct_'+idno).attr('readonly', true).css('background-color', 'rgb(237,237,238)').css('color', 'green');
-                        $('#txtSize_'+idno).attr('readonly', true).css('background-color', 'rgb(237,237,238)').css('color', 'green');
-                    }else*/{
-                        if(q_cur==1 || q_cur ==2){
-                            $('#textSize1_'+idno).attr('readonly', false).css('background-color', 'white').css('color', 'black');
-                            $('#textSize2_'+idno).attr('readonly', false).css('background-color', 'white').css('color', 'black');
-                            $('#textSize3_'+idno).attr('readonly', false).css('background-color', 'white').css('color', 'black');
-                            $('#textSize4_'+idno).attr('readonly', false).css('background-color', 'white').css('color', 'black');
-                            $('#txtRadius_'+idno).attr('readonly', false).css('background-color', 'white').css('color', 'black');
-                            $('#textWidth_'+idno).attr('readonly', false).css('background-color', 'white').css('color', 'black');
-                            $('#textDime_'+idno).attr('readonly', false).css('background-color', 'white').css('color', 'black');
-                            $('#textLengthb_'+idno).attr('readonly', false).css('background-color', 'white').css('color', 'black');
-                            $('#txtProduct_'+idno).attr('readonly', false).css('background-color', 'white').css('color', 'black');
-                            $('#txtSize_'+idno).attr('readonly', false).css('background-color', 'white').css('color', 'black');
-                        }
-                    }
-                }
+            	
             }
             
             ///////////////////////////////////////////////////  以下提供事件程式，有需要時修改
