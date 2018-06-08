@@ -1,0 +1,75 @@
+﻿declare @tmp table(
+	gno nvarchar(1),
+	rr int,
+	page int,
+	onoa nvarchar(50),
+	tggno nvarchar(50),
+	comp nvarchar(100),
+	tel nvarchar(50),
+	address nvarchar(max),
+	trantype nvarchar(50),
+	paytype nvarchar(50),
+	odatea nvarchar(10),
+	sdatea nvarchar(10),
+	floata nvarchar(50),
+	worker nvarchar(50),
+	sales nvarchar(50),
+	memo nvarchar(max),
+	productno nvarchar(50),
+	product nvarchar(250),
+	spec nvarchar(250),
+	size nvarchar(max),
+	mount float,
+	weight float,
+	price float,
+	unit nvarchar(50),
+	total float,
+	ct float,
+	uno nvarchar(50),
+	bmemo nvarchar(max),
+	tax float,
+	ttotal float
+)
+insert @tmp
+select '0',ROW_NUMBER()over(partition by b.noa order by b.no2),'',a.noa,a.tggno,c.comp,case when isnull(a.tel,'')='' then a.tel else c.tel end +' FAX：'+case when isnull(a.fax,'')='' then a.fax else c.fax end
+,case when isnull(a.addr,'')='' then a.addr else c.addr_comp end,a.trantype,a.paytype,a.odate,a.datea
+,case when isnull(a.floata,0)!=0 then cast(a.floata as nvarchar(50)) end+case when isnull(a.coin,'')!='' then '('+a.coin+')' end
+,a.worker,a.sales,a.memo,b.productno,b.product,b.spec
+,''
+,b.mount,b.weight,b.price,b.unit,b.total,b.omount,b.uno,b.memo,'',''
+from view_ordc a left join view_ordcs b on a.noa=b.noa
+left join tgg c on a.tggno=c.noa
+
+declare @pageline int =14--一頁14個品項
+declare @tggno nvarchar(50)
+declare @noa nvarchar(50)  
+declare @idno int
+declare @page int
+
+update a
+set page=ceiling(cast(rr as float)/@pageline)
+from (select page,rr from @tmp)a
+
+--補空白行
+declare cursor_table cursor for 
+select onoa,tggno,MAX(rr),MAX(page) from @tmp group by tggno,onoa
+open cursor_table 
+fetch next from cursor_table 
+into @noa,@tggno,@idno,@page
+while(@@FETCH_STATUS <> -1) 
+begin
+	while ((@idno)%@pageline>0)
+	begin
+		set @idno=@idno+1
+		insert @tmp(gno,onoa,tggno,rr,page)
+		select '1',@noa,@tggno,@idno,@page
+	end
+
+	fetch next from cursor_table 
+	into @noa,@tggno,@idno,@page
+end 
+close cursor_table 
+deallocate cursor_table
+
+select * from @tmp
+order by onoa,rr

@@ -1067,7 +1067,7 @@
 					<tr>
 						<td><span> </span><a id='lblOdate' class="lbl"> </a></td>
 						<td><input id="txtOdate" type="text" class="txt c1"/></td>
-						<td><span> </span><a id='lblDatea' class="lbl"> </a></td>
+						<td><span> </span><a id='lblDatea_ps' class="lbl">預交日期</a></td>
 						<td><input id="txtDatea" type="text" class="txt c1"/></td>
 						<td>
 							<a id='lblIsproj' class="lbl" style="float:right;"> </a><span> </span>
@@ -1281,8 +1281,8 @@
 						<input id="txtNotv.*" type="text" class="txt num" style="width:97%;"/>
 					</td>
 					<td>
-						<input id="btnUno.*" type="button" value='.' style="float:left;width:1%;"/>
-						<input id="txtUno.*" type="text" style="float:left;width:85%;" />
+						<input id="btnUno.*" type="button" value='.' style="display: none"/>
+						<input id="txtUno.*" type="text" style="float:left;width:95%;" />
 					</td>
 					<td >
                         <input id="txtMemo.*" type="text" style="width:97%; float:left;"/>
