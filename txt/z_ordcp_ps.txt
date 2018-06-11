@@ -1,4 +1,6 @@
-﻿declare @tmp table(
+﻿z_ordcp_ps1:--z_ordcp_ps1
+SET QUOTED_IDENTIFIER OFF
+declare @tmp table(
 	gno nvarchar(1),
 	rr int,
 	page int,
@@ -6,6 +8,7 @@
 	tggno nvarchar(50),
 	comp nvarchar(100),
 	tel nvarchar(50),
+	fax nvarchar(50), 
 	address nvarchar(max),
 	trantype nvarchar(50),
 	paytype nvarchar(50),
@@ -31,7 +34,8 @@
 	ttotal float
 )
 insert @tmp
-select '0',ROW_NUMBER()over(partition by b.noa order by b.no2),'',a.noa,a.tggno,c.comp,case when isnull(a.tel,'')='' then a.tel else c.tel end +' FAX：'+case when isnull(a.fax,'')='' then a.fax else c.fax end
+select '0',ROW_NUMBER()over(partition by b.noa order by b.no2),'',a.noa,a.tggno,c.comp,case when isnull(a.tel,'')='' then a.tel else c.tel end
+,case when isnull(a.fax,'')='' then a.fax else c.fax end
 ,case when isnull(a.addr,'')='' then a.addr else c.addr_comp end,a.trantype,a.paytype,a.odate,a.datea
 ,case when isnull(a.floata,0)!=0 then cast(a.floata as nvarchar(50)) end+case when isnull(a.coin,'')!='' then '('+a.coin+')' end
 ,a.worker,a.sales,a.memo,b.productno,b.product,b.spec
@@ -40,7 +44,7 @@ select '0',ROW_NUMBER()over(partition by b.noa order by b.no2),'',a.noa,a.tggno,
 from view_ordc a left join view_ordcs b on a.noa=b.noa
 left join tgg c on a.tggno=c.noa
 
-declare @pageline int =14--一頁14個品項
+declare @pageline int =3--一頁14個品項
 declare @tggno nvarchar(50)
 declare @noa nvarchar(50)  
 declare @idno int
@@ -71,5 +75,16 @@ end
 close cursor_table 
 deallocate cursor_table
 
+insert @tmp(gno,rr,page,onoa,total,tax,ttotal,memo)
+select '2',max(rr)+1,page,onoa,sum(total),sum(total)*0.05,sum(total)*1.05,max(memo)
+from @tmp
+group by page,onoa
+
+insert @tmp(gno,rr,page,onoa)
+select '3',max(rr)+1,page,onoa
+from @tmp
+group by page,onoa
+
 select * from @tmp
-order by onoa,rr
+order by onoa,page,rr
+;
