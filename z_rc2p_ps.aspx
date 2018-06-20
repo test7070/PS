@@ -18,22 +18,21 @@
              
             $(document).ready(function() {
             	q_getId();
-                q_gf('', 'z_ordcp_ps');
+                q_gf('', 'z_rc2p_ps');
                
             });
             function q_gfPost() {
                 $('#q_report').q_report({
-                    fileName : 'z_ordcp_ps',
+                    fileName : 'z_rc2p_ps',
                     options : [ {
-                        type : '1',//[1][2]
+                        type : '6',//[1][]
                         name : 'xnoa'
                     }]
                 });
                 q_popAssign();
                 
                 if(q_getHref()[1]!=undefined)
-                	$('#txtXnoa1').val(q_getHref()[1]);
-                	$('#txtXnoa2').val(q_getHref()[1]);
+                	$('#txtXnoa').val(q_getHref()[1]);
 	        }
 
             function q_boxClose(s2) {

@@ -1081,21 +1081,8 @@
 			}
 
 			function btnPrint() {
-				t_where = "noa=" + $('#txtNoa').val();
-				switch(q_getPara('sys.project').toUpperCase()){
-					case 'RK':
-						q_box("z_rc2_rkp.aspx?" + r_userno + ";" + r_name + ";" + q_time + ";" + JSON.stringify({noa:trim($('#txtNoa').val())}) + ";" + r_accy + "_" + r_cno, 'rc2_rk', "95%", "95%", m_print);
-						break;
-					case 'PK':
-						q_box("z_rc2_pkp.aspx?" + r_userno + ";" + r_name + ";" + q_time + ";" + JSON.stringify({noa:trim($('#txtNoa').val())}) + ";" + r_accy + "_" + r_cno, 'rc2_pk', "95%", "95%", m_print);
-						break;
-					case 'BD':
-						q_box("z_rc2bdp.aspx?" + r_userno + ";" + r_name + ";" + q_time + ";" + JSON.stringify({noa:trim($('#txtNoa').val())}) + ";" + r_accy + "_" + r_cno, 'rc2_pk', "95%", "95%", m_print);
-						break;	
-					default:
-						q_box("z_rc2stp.aspx?" + r_userno + ";" + r_name + ";" + q_time + ";" + t_where, '', "95%", "95%", q_getMsg('popPrint'));
-						break;
-				}
+				t_where = "noa='" + $('#txtNoa').val() + "'";
+                q_box("z_rc2p_ps.aspx?" + r_userno + ";" + r_name + ";" + q_time + ";" + t_where, '', "95%", "95%", q_getMsg('popPrint'));
 			}
 
 			function wrServer(key_value) {
