@@ -191,7 +191,7 @@
                 bbmMask = [['txtDatea', r_picd], ['txtOdate', r_picd]];
                 bbsMask = [['txtDatea', r_picd],['txtStyle','A']];
                 q_mask(bbmMask);
-                q_cmbParse("cmbKind", q_getPara('sys.stktype'));
+                //q_cmbParse("cmbKind", q_getPara('sys.stktype'));
                 q_cmbParse("cmbStype", q_getPara('orde.stype'));
                 // 需在 main_form() 後執行，才會載入 系統參數
                 //q_cmbParse("cmbCoin", q_getPara('sys.coin'));
@@ -287,6 +287,14 @@
                         opacity : 0
                     });
                     q_func('qtxt.query.conform', 'orde.txt,conform,'+ encodeURI(r_userno) + ';' + encodeURI($('#txtNoa').val()));
+                });
+                
+                $('#chkCancel').click(function(){
+                    if($(this).prop('checked')){
+                        for(var k=0;k<q_bbsCount;k++){
+                            $('#chkCancel_'+k).prop('checked',true);
+                        }
+                    }
                 });
                 
                 OrdenoAndNo2On_Change(); 
@@ -1004,15 +1012,7 @@
 
             function btnPrint() {
                 t_where = "noa='" + $('#txtNoa').val() + "'";
-                
-                switch(q_getPara('sys.project').toUpperCase()){
-                	case 'BD':
-                	q_box("z_ordebdp.aspx?" + r_userno + ";" + r_name + ";" + q_time + ";" + t_where, '', "95%", "95%", q_getMsg('popPrint'));
-                		break;
-                	default:
-                		q_box("z_ordestp.aspx?" + r_userno + ";" + r_name + ";" + q_time + ";" + t_where, '', "95%", "95%", q_getMsg('popPrint'));
-                		break;
-                }
+                q_box("z_ordep_ps.aspx?" + r_userno + ";" + r_name + ";" + q_time + ";" + t_where, '', "95%", "95%", q_getMsg('popPrint'));
             }
 
             function wrServer(key_value) {
@@ -1527,12 +1527,10 @@
                 <table class="tview" id="tview">
                     <tr>
                         <td align="center" style="width:20px; color:black;"><a id="vewChk"> </a></td>
-                        <td align="center" style="width:80px; color:black;"><a id="vewOdate"> </a></td>
-                        <td align="center" style="width:100px; color:black;"><a id="vewNoa"> </a></td>
-                        <td align="center" style="width:80px; color:black;"><a id="vewNick"> </a></td>
-                        <td align="center" style="width:80px; color:black;"><a id="vewApv"> </a></td>
-                        <td align="center" style="width:40px; color:black;"><a id="vewConform"> </a></td>
-                        <td align="center" style="width:20px; color:black; display:none;"><a id="vewEnd2"> </a></td>
+                        <td align="center" style="width:90px; color:black;"><a id="vewOdate"> </a></td>
+                        <td align="center" style="width:120px; color:black;"><a id="vewNoa"> </a></td>
+                        <td align="center" style="width:90px; color:black;"><a id="vewNick"> </a></td>
+                        <td align="center" style="width:90px; color:black;"><a id="vewApv"> </a></td>
                     </tr>
                     <tr>
                         <td><input id="chkBrow.*" type="checkbox"/></td>
@@ -1540,8 +1538,6 @@
                         <td id="noa" class="control_noa" style="text-align: center;">~noa</td>
                         <td id="nick" style="text-align: center;">~nick</td>
                         <td id="apv" style="text-align: center;">~apv</td>
-                        <td id="conform" style="text-align: center;">~conform</td>
-                        <td id="end2" class="control_end2" style="text-align: center;display:none;">~end2</td>
                     </tr>
                 </table>
             </div>
@@ -1556,9 +1552,7 @@
                             <input id="chkIsproj" type="checkbox"/>
                             <span> </span><a id='lblIsproj'> </a>
                         </td>
-                        <td style="display: none"><input id="btnOrdei" type="button"/></td>
-                        <td><span> </span><a id='lblKind' class="lbl" style="display: none"> </a></td>
-                        <td><select id="cmbKind" class="txt c1" style="display: none"> </select></td>
+                        <td><input id="btnOrdei" type="button"/></td>
                         <td ><input type="button" id="btnTip" value="?" style="float:right;" onclick="tipShow()"/></td>
                     </tr>
                     <tr>
@@ -1577,14 +1571,13 @@
 							<input id="txtComp" type="text" style="float:left;width:75%;"/>
 							<input id="txtNick" type="text" style="display:none;"/>
                         </td>
-                        <td><span> </span><a id='lblContract' class="lbl"> </a></td>
-                        <td colspan="2"><input id="txtContract" type="text" class="txt c1"/></td>
+                        
                     </tr>
                     <tr>
                         <td><span> </span><a id='lblTel' class="lbl"> </a></td>
                         <td colspan='4'><input id="txtTel" type="text" class="txt c1"/></td>
-                        <td><span> </span><a id="lblQuat" class="lbl btn"> </a></td>
-                        <td colspan="2"><input id="txtQuatno" type="text" class="txt c1"/></td>
+                        <td style="display: none"><span> </span><a id="lblQuat" class="lbl btn"> </a></td>
+                        <td colspan="2" style="display: none"><input id="txtQuatno" type="text" class="txt c1"/></td>
                     </tr>
                     <tr>
                         <td><span> </span><a id='lblFax' class="lbl"> </a></td>
@@ -1639,6 +1632,14 @@
                         <td align="center" style="display: none"><input id="btnOrdem" type="button"/></td>
                     </tr>
                     <tr>
+                        <td><span> </span><a id='lblCasetype_ps' class="lbl">材證</a></td>
+                        <td><input id="txtCasetype"  type="text"  class="txt c1"/></td>
+                        <td><span> </span><a id='lblContract_ps' class="lbl">案號</a></td>
+                        <td colspan="2"><input id="txtContract" type="text" class="txt c1"/></td>
+                        <td><span> </span><a id='lblDatea_ps' class="lbl">預交日期</a></td>
+                        <td><input id="txtDatea" type="text" class="txt c1"/></td>
+                    </tr>
+                    <tr>
                         <td><span> </span><a id='lblMemo' class="lbl"> </a></td>
                         <td colspan="6"><textarea id="txtMemo" cols="10" rows="5" style="height: 50px;" class="txt c1"> </textarea></td>
                         <td align="center"><input id="btnCredit" type="button"/></td>
@@ -1650,11 +1651,11 @@
                         <td><input id="txtWorker2"  type="text" class="txt c1"/></td>
                         <td><input id="btnApv" type="button" style="width:70%;float:right;" value="核准"/></td>
                         <td><input id="txtApv" type="text" class="txt c1" disabled="disabled"/></td>
-                        <td><span> </span><a id='lblEnd' class="lbl"> </a></td>
-                        <td>
+                        <td colspan="2">
                             <input id="chkEnda" type="checkbox"/>
-                            <input id="btnConform" type="button" style="width:70%;float:right;" value="簽回"/>
-                            <input id="txtConform" type="text" class="txt c1" style="display:none;"/>
+                            <span> </span><a id='lblEnda'> </a>
+                            <input id="chkCancel" type="checkbox"/>
+                            <span> </span><a id='lblCancel'> </a>
                         </td>
                     </tr>
                 </table>
@@ -1666,14 +1667,13 @@
                     <td align="center" style="width:30px;"><input class="btn" id="btnPlus" type="button" value="+" style="font-weight:bold;"/></td>
                     <td align="center" style="width:20px;"> </td>
                     <td align="center" style="width:60px;"><a id="lblNo2"> </a></td>
-                    <td align="center" style="width:120px;"><a id="lblProductno"> </a></td>
-                    <td align="center" style="width:80px;"><a id="lblStyle_st"> </a></td>
+                    <td align="center" style="width:100px;"><a id="lblProductno"> </a></td>
+                    <td align="center" style="width:70px;"><a id="lblStyle_st"> </a></td>
                     <td align="center" style="width:140px;" class="bbsunotr">
                     	<a id="lblProduct_s" > </a><BR class="bbsuno" style="display:none;" ><a id="lblUno_s" class="bbsuno" style="display: none;" > </a>
                     </td>
                     <td align="center" style="width:80px;display: none;" class="bbssource"><a id='lblSource_s_st'> </a></td>
-                    <td align="center" style="width:50px;"><a id='lblClasss'> </a></td>
-                    <td align="center" style="width:400px;" id='Size'>
+                    <td align="center" style="width:410px;" id='Size'>
                         <a id='lblSize_help'>厚度 x 寬度/OD x 長度/ID x 寬度2 x 寬度3 </a>
                     </td>
                     <td align="center" style="width:50px;"><a id='lblUnit'> </a></td>
@@ -1683,9 +1683,11 @@
                     <td align="center" style="width:120px;"><a id='lblPrices'> </a></td>
                     <td align="center" style="width:120px;"><a id='lblTotals'> </a><br><a id='lblTheorys'> </a></td>
                     <td align="center" style="width:120px;"><a id='lblGemounts'> </a><br><a id='lblNotv'> </a></td>
+                    <td align="center" style="width:120px;"><a id='lblUno_ps'>爐號</a></td>
                     <td align="center" style="width:120px;"><a id='lblDateas'> </a></td>
-                    <td align="center" style="width:250px;"><a id='lblMemos'> </a></td>
+                    <td align="center" style="width:220px;"><a id='lblMemos_ps'>備註</a></td>
                     <td align="center" style="width:40px;"><a id='lblEnda_st'> </a></td>
+                    <td align="center" style="width:40px;"><a id='lblCancel'>取消</a></td>
                     <td align="center" style="width:40px;"><a id='lblBorn'> </a></td>
                 </tr>
                 <tr style='background:#cad3ff;'>
@@ -1703,11 +1705,8 @@
                     <td>
                         <span style="width:20px;height:1px;display:none;float:left;"> </span>
                         <input id="txtProduct.*" type="text" style="float:left;width:93%;"/>
-                        <input class="btn bbsuno" id="btnUno.*" type="button" value='.' style="display:none;float:left;width:20px;height:25px;"/>
-                        <input class="txt c1 bbsuno" id="txtUno.*" type="text" style="width:79%;display: none;"/>
                     </td>
                     <td class="bbssource" style="display: none;"><input id="txtSource.*" type="text" style="width:90%;text-align:center;"/></td>
-                    <td><input id="txtClass.*" type="text" style="width:90%;text-align:center;"/></td>
                     <td>
                         <input class="txt num" id="textSize1.*" type="text" style="float: left;width:55px;" disabled="disabled"/>
                         <div id="x1.*" style="float: left;display:block;width:20px;padding-top: 4px;" >x</div>
@@ -1737,13 +1736,15 @@
 						<input class="txt num " id="txtC1.*" type="text" style="width:95%;"/>
 						<input class="txt num " id="txtNotv.*" type="text" style="width:95%;"/>
                     </td>
+                    <td><input class="txt " id="txtUno.*" type="text" style="width:95%;"/></td>
                     <td><input class="txt " id="txtDatea.*" type="text" style="width:95%;"/></td>
                     <td>
 						<input id="txtMemo.*" type="text" style="width:95%; float:left;"/>
-						<input id="txtQuatno.*" type="text"  style="width:70%;float:left;"/>
-						<input id="txtNo3.*" type="text"  style="width:20%;float:left;"/>
+						<input id="txtQuatno.*" type="text"  style="width:70%;float:left;display: none"/>
+						<input id="txtNo3.*" type="text"  style="width:20%;float:left;display: none"/>
                     </td>
                     <td align="center"><input id="chkEnda.*" type="checkbox"/></td>
+                    <td align="center"><input id="chkCancel.*" type="checkbox"/></td>
                     <td align="center"><input class="btn" id="btnBorn.*" type="button" value='.' style=" font-weight: bold;"/></td>
                 </tr>
             </table>
