@@ -1,0 +1,120 @@
+﻿z_rc2p_ps1:--z_rc2p_ps1
+SET QUOTED_IDENTIFIER OFF
+declare @t_noa nvarchar(20) = case when '#non' = [1] then '' else [1] end
+declare @tmp table(
+		gno nvarchar(1),
+		rr int,
+		page int,
+		tggno nvarchar(50),
+		comp nvarchar(50),
+		trantype nvarchar(50),
+		onoa nvarchar(50),
+		cnoa nvarchar(50),
+		tel nvarchar(50),
+		fax nvarchar(50),
+		paytype nvarchar(50),
+		address nvarchar(max),
+		floata nvarchar(50),
+		sales nvarchar(50),
+					
+		product nvarchar(250),
+		spec nvarchar(250),
+		size nvarchar(50),
+		mount float,
+		weight float,
+		price float,
+		unit nvarchar(50),
+		total float,
+		ct float,
+		uno nvarchar(50),
+		bmemo nvarchar(50),
+		memo nvarchar(max),
+		tax float,
+		ttotal float
+)
+insert @tmp
+select '0',ROW_NUMBER()over(partition by b.noa order by b.noq),'',a.tggno,a.comp,a.trantype,a.noa,a.ordcno,a.tel,c.fax,a.paytype,case when isnull(a.addr2,'')!='' then a.addr2 else a.addr end
+,dbo.getcomma(a.floata,-1)+case when isnull(a.coin,'')!='' then '('+a.coin+')' end,a.worker
+,b.product,b.spec
+,case when b.style='C' or b.style='P' or b.style='K' or b.style='F' or b.style='G' or b.style='I' then dbo.getComma(b.dime,2)+case when isnull(b.width,0)!=0  then '*'+cast(b.width as nvarchar(50)) else '' end+case when b.style='C' then '*'+'C' else case when isnull(b.lengthb,0)!=0  then '*'+cast(b.lengthb as nvarchar(50)) else '' end end
+--圓板
+else case when b.style='O' then dbo.getComma(b.dime,2)+case when isnull(b.width,0)!=0 then '*OD '+cast(b.width as nvarchar(50)) else '' end
+--內外圓
+else case when b.style='Q' then dbo.getComma(b.dime,2)+case when isnull(b.width,0)!=0 then '*OD '+cast(b.width as nvarchar(50)) else '' end+case when isnull(b.lengthb,0)!=0 then '*ID '+cast(b.lengthb as nvarchar(50)) else '' end
+--X=不規則板 M=其它凹製品
+else case when b.style='X' or b.style='M' then dbo.getComma(b.dime,2)+'*圖形'
+--L=角?S=方管
+else case when b.style='L' or b.style='S'  then dbo.getComma(b.dime,2)+case when isnull(width,0)!=0 then '*'+cast(b.width as nvarchar(50)) else '' end+case when isnull(b.radius,0)!=0 then '*'+cast(b.radius as nvarchar(50)) else '' end+case when isnull(b.lengthb,0)!=0 then '*'+cast(b.lengthb as nvarchar(50)) else '' end
+--U=槽鐵
+else case when b.style='U' then dbo.getComma(b.dime,2)+case when isnull(width,0)!=0 then '*'+cast(b.width as nvarchar(50)) else '' end+case when isnull(b.radius,0)!=0 then '*'+cast(b.radius as nvarchar(50)) else '' end+case when isnull(b.lengthc,0)!=0 then '*'+cast(b.lengthc as nvarchar(50)) else '' end+case when isnull(b.lengthb,0)!=0 then '*'+cast(b.lengthb as nvarchar(50)) else '' end
+--B=圓條
+else case when b.style='B' then 'OD '+cast(b.width as nvarchar(50))+case when isnull(b.lengthb,0)!=0 then cast(b.lengthb as nvarchar(50))  else '' end
+--T=圓管
+else case when b.style='T' then dbo.getComma(b.dime,2)+case when isnull(b.width,0)!=0 then '*OD '+cast(b.width as nvarchar(50))  else '' end+case when isnull(b.lengthb,0)!=0 then cast(b.lengthb as nvarchar(50))  else '' end
+--其他
+else dbo.getComma(b.dime,2)+case when isnull(b.width,0)!=0 then '*'+cast(b.width as nvarchar(50)) else '' end+case when isnull(b.lengthb,0)!=0 then '*'+cast(b.lengthb as nvarchar(50)) else '' end+case when isnull(b.radius,0)!=0 then '*'+cast(b.radius as nvarchar(50)) else '' end+case when isnull(b.lengthc,0)!=0 then '*'+cast(b.lengthc as nvarchar(50)) else '' end
+end end end end end end end end
+,b.mount,b.weight,b.price,b.unit,b.total,b.discount,b.uno,b.memo,a.memo,'',''
+from view_rc2 a left join view_rc2s b on a.noa=b.noa
+left join tgg c on a.tggno=c.noa
+where a.noa=@t_noa
+
+declare @pageline int =18--一頁18個品項
+declare @tggno nvarchar(50)
+declare @noa nvarchar(50)  
+declare @idno int
+declare @page int
+
+update a
+set page=ceiling(cast(rr as float)/@pageline)
+from (select page,rr from @tmp)a
+
+--補空白行
+declare cursor_table cursor for 
+select onoa,tggno,MAX(rr),MAX(page) from @tmp group by tggno,onoa
+open cursor_table 
+fetch next from cursor_table 
+into @noa,@tggno,@idno,@page
+while(@@FETCH_STATUS <> -1) 
+begin
+	while ((@idno)%@pageline>0)
+	begin
+		set @idno=@idno+1
+		insert @tmp(gno,onoa,tggno,rr,page)
+		select '1',@noa,@tggno,@idno,@page
+	end
+
+	fetch next from cursor_table 
+	into @noa,@tggno,@idno,@page
+end 
+close cursor_table 
+deallocate cursor_table
+
+insert @tmp(gno,rr,page,onoa,mount,weight,total,tax,ttotal,memo)
+select '2',max(rr)+1,page,onoa,sum(mount),sum(weight),sum(total),sum(total)*0.05,sum(total)*1.05,max(memo)
+from @tmp
+group by page,onoa
+
+update a
+set mount=case when a.page=b.page then b.mount end,weight=case when a.page=b.page then b.weight end
+,total=case when a.page=b.page then b.total end,tax=case when a.page=b.page then b.tax end
+,ttotal=case when a.page=b.page then b.ttotal end
+from @tmp a
+outer apply(select sum(mount)mount,sum(weight)weight,sum(total)total,sum(tax)tax,sum(ttotal)ttotal,max(page)page from @tmp where gno='2' and a.onoa=onoa)b
+where gno='2'
+
+insert @tmp(gno,rr,page,onoa)
+select '3',max(rr)+1,page,onoa
+from @tmp
+group by page,onoa
+
+select 
+dbo.getComma(mount,0)mount
+,dbo.getComma(weight,1)weight
+,dbo.getComma(price,3)price
+,dbo.getComma(total,0)total
+,dbo.getComma(tax,0)tax
+,dbo.getComma(ttotal,0)ttotal
+,* from @tmp
+order by onoa,page,rr
+;

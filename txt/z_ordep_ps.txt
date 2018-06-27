@@ -1,0 +1,38 @@
+declare @tmp table(
+	gno nvarchar(1),
+	rr int,
+	page int,
+	noa nvarchar(50),
+	odate nvarchar(10),
+	sdatea nvarchar(10),
+	trantype nvarchar(50),
+	paytype nvarchar(50),
+	casetype nvarchar(50),
+	custno nvarchar(50),
+	comp nvarchar(100),
+	tel nvarchar(50),
+	fax nvarchar(50),
+	address nvarchar(max),
+	contract nvarchar(50),
+	worker nvarchar(50),
+	sales nvarchar(50),
+	memo nvarchar(max),														
+
+	product nvarchar(50),
+	spec nvarchar(50),
+	size nvarchar(50),
+	mount float,
+	theroy float,
+	price float,
+	weight float,
+	uno nvarchar(50),
+	bmemo nvarchar(max)
+)
+insert @tmp
+select '0','','',a.noa,a.odate,a.datea,a.trantype,a.paytype,a.casetype,a.custno,a.comp,case when isnull(a.tel,'')!='' then a.tel else c.tel end,c.fax
+,case when isnull(a.addr2,'')!='' then a.addr2 else a.addr end,a.contract,a.worker,a.sales,a.
+from view_orde a left join view_ordes b on a.noa=b.noa
+left join cust c on a.custno=c.noa 
+
+
+select * from @tmp
