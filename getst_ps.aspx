@@ -85,8 +85,8 @@
 				bbmMask = [['txtDatea', r_picd], ['txtCucdate', r_picd]];
 				q_mask(bbmMask);
                 q_cmbParse("cmbTypea", ('').concat(new Array('','裁剪','加工','進貨','退貨','盤點','調料')));
-				q_cmbParse("cmbKind", q_getPara('sys.stktype'));
-				// 需在 main_form() 後執行，才會載入 系統參數
+                q_cmbParse("cmbKind", q_getPara('sys.stktype'));
+
 				/* 若非本會計年度則無法存檔 */
 				/*$('#txtDatea').focusout(function() {
 					if ($(this).val().substr(0, 3) != r_accy) {
