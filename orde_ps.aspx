@@ -1571,7 +1571,6 @@
 							<input id="txtComp" type="text" style="float:left;width:75%;"/>
 							<input id="txtNick" type="text" style="display:none;"/>
                         </td>
-                        
                     </tr>
                     <tr>
                         <td><span> </span><a id='lblTel' class="lbl"> </a></td>
