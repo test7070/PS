@@ -1666,11 +1666,11 @@
                     <td align="center" style="width:30px;"><input class="btn" id="btnPlus" type="button" value="+" style="font-weight:bold;"/></td>
                     <td align="center" style="width:20px;"> </td>
                     <td align="center" style="width:60px;"><a id="lblNo2"> </a></td>
-                    <td align="center" style="width:100px;"><a id="lblProductno"> </a></td>
                     <td align="center" style="width:70px;"><a id="lblStyle_st"> </a></td>
                     <td align="center" style="width:140px;" class="bbsunotr">
                     	<a id="lblProduct_s" > </a><BR class="bbsuno" style="display:none;" ><a id="lblUno_s" class="bbsuno" style="display: none;" > </a>
                     </td>
+                    <td align="center" style="width:120px;"><a id="lblSpec_ps">板面</a></td>
                     <td align="center" style="width:80px;display: none;" class="bbssource"><a id='lblSource_s_st'> </a></td>
                     <td align="center" style="width:410px;" id='Size'>
                         <a id='lblSize_help'>厚度 x 寬度/OD x 長度/ID x 寬度2 x 寬度3 </a>
@@ -1694,16 +1694,17 @@
                     <td><a id="lblNo.*" style="font-weight: bold;text-align: center;display: block;"> </a></td>
                     <td><input class="txt" id="txtNo2.*" type="text" style="width:95%;"/></td>
                     <td>
-						<input class="btn"  id="btnProduct.*" type="button" style=" font-weight: bold;width:15px;height:25px;float:left;"/>
-						<input type="text" id="txtProductno.*"  style="width:75px; float:left;"/>
-                    </td>
-                    <td>
                         <input id="btnStyle.*" type="button" style="width:1%;text-align:center;" value="."/>
                         <input id="txtStyle.*" type="text" style="width:45%;text-align:center;"/>
                     </td>
                     <td>
+                        <input class="btn"  id="btnProduct.*" type="button" style=" font-weight: bold;width:15px;height:25px;float:left;"/>
+                        <input type="text" id="txtProductno.*"  style="width:80%; float:left;"/>
                         <span style="width:20px;height:1px;display:none;float:left;"> </span>
                         <input id="txtProduct.*" type="text" style="float:left;width:93%;"/>
+                    </td>
+                     <td>
+                        <input id="txtSpec.*" type="text" style="float:left;width:93%;"/>
                     </td>
                     <td class="bbssource" style="display: none;"><input id="txtSource.*" type="text" style="width:90%;text-align:center;"/></td>
                     <td>
