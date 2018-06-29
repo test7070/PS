@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" dir="ltr" >
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
@@ -15,44 +15,42 @@
 		<script src="css/jquery/ui/jquery.ui.widget.js"> </script>
 		<script src="css/jquery/ui/jquery.ui.datepicker_tw.js"> </script>
 		<script type="text/javascript">
+             
             $(document).ready(function() {
-                _q_boxClose();
-                q_getId();
-                q_gf('', 'z_cutp_ps');
+            	q_getId();
+                q_gf('', 'z_vccestp_ps');
+               
             });
             function q_gfPost() {
                 $('#q_report').q_report({
-                    fileName : 'z_cutp_ps',
-                    options : [{//[1]
-						type : '0',
-						name : 'accy',
-                        value : q_getId()[4] 
-                    },{//1  [2][3]
-                        type : '1',
+                    fileName : 'z_vccestp_ps',
+                    options : [ {
+                        type : '6',//[1][]
                         name : 'xnoa'
                     }]
                 });
                 q_popAssign();
-                q_getFormat();
-                q_langShow();
-                $('#txtDate1').mask('999/99/99');
-                $('#txtDate1').datepicker();
-                $('#txtDate2').mask('999/99/99');
-                $('#txtDate2').datepicker();
-                var t_key = q_getHref();
-                if(t_key[1] != undefined){
-                	$('#txtXnoa1').val(t_key[1]);
-                	$('#txtXnoa2').val(t_key[1]);
-                }
-            }
+                
+                if(q_getHref()[1]!=undefined)
+                	$('#txtXnoa').val(q_getHref()[1]);
+	        }
+
             function q_boxClose(s2) {
             }
             function q_gtPost(s2) {
             }
-		</script>
+	</script>
+	<style type="text/css">
+		#frameReport table{
+			border-collapse: collapse;
+		}
+	</style>
 	</head>
-	<body id="z_accc" ondragstart="return false" draggable="false" ondragenter="event.dataTransfer.dropEffect='none'; event.stopPropagation(); event.preventDefault();"
-	ondragover="event.dataTransfer.dropEffect='none';event.stopPropagation(); event.preventDefault();" ondrop="event.dataTransfer.dropEffect='none';event.stopPropagation(); event.preventDefault();">
+	<body ondragstart="return false" draggable="false"
+        ondragenter="event.dataTransfer.dropEffect='none'; event.stopPropagation(); event.preventDefault();"  
+        ondragover="event.dataTransfer.dropEffect='none';event.stopPropagation(); event.preventDefault();"  
+        ondrop="event.dataTransfer.dropEffect='none';event.stopPropagation(); event.preventDefault();"
+     >
 		<div id="q_menu"> </div>
 		<div style="position: absolute;top: 10px;left:50px;z-index: 1;width:2000px;">
 			<div id="container">
