@@ -921,29 +921,29 @@
 						</td>
 						<td><input class="txt c1" id="txtOrdeno.*" type="text" /></td>
 						<td><input class="txt c1" id="txtNo2.*" type="text" /></td>
-						<td><input type="text" id="txtStyle_0" style="width: 85%; text-align: center; background: rgb(237, 237, 238);" readonly="readonly" disabled="disabled"></td>
+						<td><input type="text" id="txtStyle.*" style="width: 85%; text-align: center; background: rgb(237, 237, 238);" readonly="readonly" disabled="disabled"></td>
 						<td>
 							<input class="txt c1" id="txtProductno.*" type="text"  style="width: 80%;"/>
 							<input class="btn"  id="btnProduct.*" type="button" value='.' style=" font-weight: bold;" />
 							<input class="txt c1" id="txtProduct.*" type="text" />
 						</td>
-						<td><input type="text" id="txtSpec_0" style="width: 85%; text-align: center; background: rgb(237, 237, 238);" readonly="readonly" disabled="disabled"></td>
+						<td><input type="text" id="txtSpec.*" style="width: 85%; text-align: center; background: rgb(237, 237, 238);" readonly="readonly" disabled="disabled"></td>
 						<td class="st hide01">
-							<input class="txt num" id="textSize1_0" type="text" style="float: left; width: 55px; background: rgb(237, 237, 238);" readonly="readonly" disabled="disabled">
+							<input class="txt num" id="textSize1.*" type="text" style="float: left; width: 55px; background: rgb(237, 237, 238);" readonly="readonly" disabled="disabled">
 							<div id="x1_0" style="float: left;display:block;width:20px;padding-top: 4px;">x</div>
-							<input class="txt num" id="textSize2_0" type="text" style="float: left; width: 55px; background: rgb(237, 237, 238);" readonly="readonly" disabled="disabled">
+							<input class="txt num" id="textSize2.*" type="text" style="float: left; width: 55px; background: rgb(237, 237, 238);" readonly="readonly" disabled="disabled">
 							<div id="x2_0" style="float: left;display:block;width:20px;padding-top: 4px;">x</div>
-							<input class="txt num" id="textSize3_0" type="text" style="float: left; width: 55px; background: rgb(237, 237, 238);" readonly="readonly" disabled="disabled">
+							<input class="txt num" id="textSize3.*" type="text" style="float: left; width: 55px; background: rgb(237, 237, 238);" readonly="readonly" disabled="disabled">
 							<div id="x3_0" style="float: left;display:block;width:20px;padding-top: 4px;">x</div>
-							<input class="txt num" id="textSize4_0" type="text" style="float: left; width: 55px; background: rgb(237, 237, 238);" readonly="readonly" disabled="disabled">
+							<input class="txt num" id="textSize4.*" type="text" style="float: left; width: 55px; background: rgb(237, 237, 238);" readonly="readonly" disabled="disabled">
 							<div id="x4_0" style="float: left;display:block;width:20px;padding-top: 4px;">x</div>
-                        	<input class="txt num" id="textSize5_0" type="text" style="float: left; width: 55px; background: rgb(237, 237, 238);" readonly="readonly" disabled="disabled">
+                        	<input class="txt num" id="textSize5.*" type="text" style="float: left; width: 55px; background: rgb(237, 237, 238);" readonly="readonly" disabled="disabled">
 							<!--上為虛擬下為實際-->
-							<input id="txtRadius_0" type="text" style="display: none; background: rgb(237, 237, 238);" readonly="readonly">
-							<input id="txtWidth_0" type="text" style="display: none; background: rgb(237, 237, 238);" readonly="readonly">
-							<input id="txtDime_0" type="text" style="display: none; background: rgb(237, 237, 238);" readonly="readonly">
-							<input id="txtLengthb_0" type="text" style="display: none; background: rgb(237, 237, 238);" readonly="readonly">
-								<input id="txtLengthc_0" type="text" style="display: none; background: rgb(237, 237, 238);" readonly="readonly">
+							<input id="txtRadius.*" type="text" style="display: none; background: rgb(237, 237, 238);" readonly="readonly">
+							<input id="txtWidth.*" type="text" style="display: none; background: rgb(237, 237, 238);" readonly="readonly">
+							<input id="txtDime.*" type="text" style="display: none; background: rgb(237, 237, 238);" readonly="readonly">
+							<input id="txtLengthb.*" type="text" style="display: none; background: rgb(237, 237, 238);" readonly="readonly">
+								<input id="txtLengthc.*" type="text" style="display: none; background: rgb(237, 237, 238);" readonly="readonly">
 							</td>
 						<td><input class="txt c1" id="txtUnit.*" type="text" /></td>
 						<td><input class="txt num c1" id="txtMount.*" type="text"/></td>
