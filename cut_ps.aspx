@@ -170,7 +170,6 @@
 								b_pop = '';
 								return;
 							}
-							
 							$('#txtUno').val(b_ret[0].uno);
 							$('#txtProductno').val(b_ret[0].productno);
 							$('#txtProduct').val(b_ret[0].product);
