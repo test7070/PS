@@ -48,6 +48,7 @@
 				q_brwCount();
 				q_gt(q_name, q_content, q_sqlCount, 1, 0, '', r_accy);
 				var t_db=q_db.toLocaleUpperCase();
+				window.parent.document.title='發貨作業';
 				q_gt('acomp', "where=^^(dbname='"+t_db+"' or not exists (select * from acomp where dbname='"+t_db+"')) ^^ stop=1", 0, 0, 0, "cno_acomp");
 			});
 
@@ -1022,6 +1023,7 @@
 						<td align="center">
 							<input class="btn"  id="btnPlus" type="button" value='+' style="font-weight: bold;"  />
 						</td>
+						<td align="center" style="width:150px;"><a id='lblUno_pa'>領料爐號</a></td>
 						<td align="center" style="width:50px; cursor: e-resize;"><a id="lblStyle_st"></a></td>
 						<td align="center" style="width:150px;"><a id='lblProductno_s'> </a></td>
 						<td align="center" style="width:120px; cursor: e-resize;"><a>板面</a></td>
@@ -1041,7 +1043,7 @@
 							<input class="btn"  id="btnMinus.*" type="button" value='-' style=" font-weight: bold;" />
 							<input id="txtNoq.*" type="text" style="display:none;"/>
 						</td>
-						
+						<td><input type="text" id="txtUno.*" style="width: 95%; text-align: center; background: rgb(237, 237, 238);" readonly="readonly" disabled="disabled"></td>
 						<td><input type="text" id="txtStyle.*" style="width: 85%; text-align: center; background: rgb(237, 237, 238);" readonly="readonly" disabled="disabled"></td>
 						<td>
 							<input class="txt c1" id="txtProductno.*" type="text"  style="width: 80%;"/>
